@@ -1,18 +1,28 @@
 use serde::{Deserialize, Serialize};
 
+use super::nonlocal::{PpInfo, PpNlcc, PpNonlocal, PpPseudoWavefunctions, PpSemilocal};
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename = "UPF")]
 pub struct UpfData {
     #[serde(rename = "@version")]
     pub version: String,
+    #[serde(rename = "PP_INFO")]
+    pub info: Option<PpInfo>,
     #[serde(rename = "PP_HEADER")]
     pub header: PpHeader,
     #[serde(rename = "PP_MESH")]
     pub mesh: PpMesh,
+    #[serde(rename = "PP_NLCC")]
+    pub nlcc: Option<PpNlcc>,
     #[serde(rename = "PP_LOCAL")]
     pub local: PpLocal,
     #[serde(rename = "PP_NONLOCAL")]
-    pub nonlocal: PpNonlocalStub,
+    pub nonlocal: PpNonlocal,
+    #[serde(rename = "PP_SEMILOCAL")]
+    pub semilocal: Option<PpSemilocal>,
+    #[serde(rename = "PP_PSWFC")]
+    pub pswfc: Option<PpPseudoWavefunctions>,
     #[serde(rename = "PP_RHOATOM")]
     pub rhoatom: PpRhoAtom,
 }
@@ -132,6 +142,3 @@ pub type PpR = NumericArray;
 pub type PpRab = NumericArray;
 pub type PpLocal = NumericArray;
 pub type PpRhoAtom = NumericArray;
-
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
-pub struct PpNonlocalStub {}
