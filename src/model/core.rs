@@ -11,29 +11,29 @@ use super::{
 pub struct UpfData {
     #[serde(rename = "@version")]
     pub version: String,
-    #[serde(rename = "PP_INFO")]
+    #[serde(rename = "PP_INFO", skip_serializing_if = "Option::is_none")]
     pub info: Option<PpInfo>,
     #[serde(rename = "PP_HEADER")]
     pub header: PpHeader,
     #[serde(rename = "PP_MESH")]
     pub mesh: PpMesh,
-    #[serde(rename = "PP_NLCC")]
+    #[serde(rename = "PP_NLCC", skip_serializing_if = "Option::is_none")]
     pub nlcc: Option<PpNlcc>,
     #[serde(rename = "PP_LOCAL")]
     pub local: PpLocal,
-    #[serde(rename = "PP_SEMILOCAL")]
+    #[serde(rename = "PP_SEMILOCAL", skip_serializing_if = "Option::is_none")]
     pub semilocal: Option<PpSemilocal>,
     #[serde(rename = "PP_NONLOCAL")]
     pub nonlocal: PpNonlocal,
-    #[serde(rename = "PP_PSWFC")]
+    #[serde(rename = "PP_PSWFC", skip_serializing_if = "Option::is_none")]
     pub pswfc: Option<PpPseudoWavefunctions>,
-    #[serde(rename = "PP_FULL_WFC")]
+    #[serde(rename = "PP_FULL_WFC", skip_serializing_if = "Option::is_none")]
     pub full_wfc: Option<PpFullWfc>,
     #[serde(rename = "PP_RHOATOM")]
     pub rhoatom: PpRhoAtom,
-    #[serde(rename = "PP_PAW")]
+    #[serde(rename = "PP_PAW", skip_serializing_if = "Option::is_none")]
     pub paw: Option<PpPaw>,
-    #[serde(rename = "PP_GIPAW")]
+    #[serde(rename = "PP_GIPAW", skip_serializing_if = "Option::is_none")]
     pub gipaw: Option<PpGipaw>,
 }
 
@@ -67,6 +67,16 @@ impl UpfData {
                 mesh,
                 self.rhoatom.values.len()
             )));
+        }
+        if self.header.is_paw == "T" && self.paw.is_none() {
+            return Err(crate::UpfError::Validation(
+                "PP_HEADER marks the dataset as PAW but PP_PAW is missing".into(),
+            ));
+        }
+        if self.header.has_gipaw == "T" && self.gipaw.is_none() {
+            return Err(crate::UpfError::Validation(
+                "PP_HEADER marks the dataset as GIPAW-enabled but PP_GIPAW is missing".into(),
+            ));
         }
         Ok(())
     }

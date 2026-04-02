@@ -14,17 +14,17 @@ pub struct PpPaw {
     pub format_version: String,
     #[serde(rename = "PP_AUGMENTATION")]
     pub augmentation: PpAugmentation,
-    #[serde(rename = "PP_AE_RHO_ATC")]
+    #[serde(rename = "PP_AE_RHO_ATC", skip_serializing_if = "Option::is_none")]
     pub ae_rho_atc: Option<NumericArray>,
     #[serde(rename = "$value", default)]
     pub entries: Vec<PpPawEntry>,
-    #[serde(rename = "PP_AEVLOC")]
+    #[serde(rename = "PP_AEVLOC", skip_serializing_if = "Option::is_none")]
     pub aevloc: Option<NumericArray>,
-    #[serde(rename = "PP_KDIFF")]
+    #[serde(rename = "PP_KDIFF", skip_serializing_if = "Option::is_none")]
     pub kdiff: Option<NumericArray>,
-    #[serde(rename = "PP_OCCUP")]
+    #[serde(rename = "PP_OCCUP", skip_serializing_if = "Option::is_none")]
     pub occupations: Option<NumericArray>,
-    #[serde(rename = "PP_GRID_RECON")]
+    #[serde(rename = "PP_GRID_RECON", skip_serializing_if = "Option::is_none")]
     pub grid_recon: Option<NumericArray>,
 }
 

@@ -6,11 +6,11 @@ use super::NumericArray;
 pub struct PpGipaw {
     #[serde(rename = "PP_GIPAW_FORMAT_VERSION")]
     pub format_version: String,
-    #[serde(rename = "GIPAW_CORE_ORBITALS")]
+    #[serde(rename = "GIPAW_CORE_ORBITALS", skip_serializing_if = "Option::is_none")]
     pub core_orbitals: Option<GipawCoreOrbitals>,
-    #[serde(rename = "GIPAW_LOCAL_DATA")]
+    #[serde(rename = "GIPAW_LOCAL_DATA", skip_serializing_if = "Option::is_none")]
     pub local_data: Option<GipawLocalData>,
-    #[serde(rename = "GIPAW_ORBITALS")]
+    #[serde(rename = "GIPAW_ORBITALS", skip_serializing_if = "Option::is_none")]
     pub orbitals: Option<GipawOrbitals>,
 }
 
@@ -36,9 +36,9 @@ pub struct GipawOrbitals {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GipawOrbital {
-    #[serde(rename = "@label")]
+    #[serde(rename = "@label", skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
-    #[serde(rename = "@l")]
+    #[serde(rename = "@l", skip_serializing_if = "Option::is_none")]
     pub l: Option<usize>,
     #[serde(rename = "$text")]
     pub values: Vec<f64>,

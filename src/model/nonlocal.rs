@@ -6,7 +6,7 @@ use super::NumericArray;
 pub struct PpInfo {
     #[serde(rename = "$text", default)]
     pub body_text: String,
-    #[serde(rename = "PP_INPUTFILE")]
+    #[serde(rename = "PP_INPUTFILE", skip_serializing_if = "Option::is_none")]
     pub input_file: Option<String>,
 }
 
@@ -18,7 +18,7 @@ pub struct PpBeta {
     pub angular_momentum: usize,
     #[serde(rename = "@cutoff_radius")]
     pub cutoff_radius: f64,
-    #[serde(rename = "@ultrasoft_cutoff_radius")]
+    #[serde(rename = "@ultrasoft_cutoff_radius", skip_serializing_if = "Option::is_none")]
     pub ultrasoft_cutoff_radius: Option<f64>,
     #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
     pub values: Vec<f64>,
@@ -30,11 +30,17 @@ pub struct PpDij {
     pub values: Vec<f64>,
 }
 
+impl PpDij {
+    fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct PpNonlocal {
     #[serde(rename = "$value", default)]
     pub betas: Vec<PpBetaNode>,
-    #[serde(rename = "PP_DIJ", default)]
+    #[serde(rename = "PP_DIJ", default, skip_serializing_if = "PpDij::is_empty")]
     pub dij: PpDij,
 }
 
@@ -74,7 +80,7 @@ pub enum PpSemilocalChannel {
 pub struct PpSemilocalValues {
     #[serde(rename = "@L")]
     pub l: usize,
-    #[serde(rename = "@J")]
+    #[serde(rename = "@J", skip_serializing_if = "Option::is_none")]
     pub j: Option<f64>,
     #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
     pub values: Vec<f64>,
@@ -96,7 +102,7 @@ pub struct PpWavefunction {
     pub label: String,
     #[serde(rename = "@l")]
     pub l: usize,
-    #[serde(rename = "@occupation")]
+    #[serde(rename = "@occupation", skip_serializing_if = "Option::is_none")]
     pub occupation: Option<f64>,
     #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
     pub values: Vec<f64>,
