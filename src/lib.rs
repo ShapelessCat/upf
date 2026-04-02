@@ -1,3 +1,8 @@
+mod error;
+mod text;
+
+pub use error::UpfError;
+
 #[derive(Debug, Clone, PartialEq, Hash)]
 pub struct UpfDocument;
 

@@ -15,6 +15,6 @@ log = "0.4.29"
 
 serde = { version = "1.0.228", features = ["derive"] }
 serde_with = "3.18.0"
-quick-xml = { version = "0.39.2", features = ["serde"] }
+quick-xml = { version = "0.39.2", features = ["serde", "serialize"] }
 
 validify = "2.0.0"
