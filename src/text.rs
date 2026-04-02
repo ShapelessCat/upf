@@ -41,7 +41,7 @@ pub fn format_bool_flag(value: bool) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::{format_bool_flag, format_f64_slice, parse_bool_flag, parse_f64_vec};
+    use super::{UpfError, format_bool_flag, format_f64_slice, parse_bool_flag, parse_f64_vec};
 
     #[test]
     fn parses_free_format_float_vectors() {
@@ -52,7 +52,10 @@ mod tests {
     #[test]
     fn rejects_invalid_float_vectors() {
         let err = parse_f64_vec("1.0 nope 3.0").unwrap_err();
-        assert!(err.to_string().contains("invalid floating-point value"));
+        assert!(matches!(
+            err,
+            UpfError::InvalidFloat { token } if token == "nope"
+        ));
     }
 
     #[test]
