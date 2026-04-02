@@ -6,7 +6,10 @@ use super::NumericArray;
 pub struct PpGipaw {
     #[serde(rename = "PP_GIPAW_FORMAT_VERSION")]
     pub format_version: String,
-    #[serde(rename = "GIPAW_CORE_ORBITALS", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "GIPAW_CORE_ORBITALS",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub core_orbitals: Option<GipawCoreOrbitals>,
     #[serde(rename = "GIPAW_LOCAL_DATA", skip_serializing_if = "Option::is_none")]
     pub local_data: Option<GipawLocalData>,

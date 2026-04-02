@@ -18,7 +18,10 @@ pub struct PpBeta {
     pub angular_momentum: usize,
     #[serde(rename = "@cutoff_radius")]
     pub cutoff_radius: f64,
-    #[serde(rename = "@ultrasoft_cutoff_radius", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "@ultrasoft_cutoff_radius",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub ultrasoft_cutoff_radius: Option<f64>,
     #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
     pub values: Vec<f64>,
