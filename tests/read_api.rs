@@ -1,6 +1,6 @@
-use std::{fs, io::Cursor};
+use std::{fs, io::Cursor, time::{SystemTime, UNIX_EPOCH}};
 
-use upf::{from_file, from_reader, from_str};
+use upf::{UpfError, from_file, from_reader, from_str};
 
 const INVALID_MESH: &str = r#"
 <UPF version="2.0.1">
@@ -69,15 +69,23 @@ fn file_entry_point_reads_from_disk() {
       <PP_RHOATOM>0.2 0.3 0.4</PP_RHOATOM>
     </UPF>
     "#;
-    let path = std::env::temp_dir().join("upf-read-api.upf");
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let path = std::env::temp_dir().join(format!("upf-read-api-{nanos}.upf"));
     fs::write(&path, xml).unwrap();
 
     let doc = from_file(&path).unwrap();
     assert_eq!(doc.header.element, "He");
+    fs::remove_file(path).unwrap();
 }
 
 #[test]
 fn invalid_mesh_lengths_are_rejected() {
     let err = from_str(INVALID_MESH).unwrap_err();
-    assert!(err.to_string().contains("mesh_size"));
+    match err {
+        UpfError::Validation(msg) => assert!(msg.contains("mesh_size")),
+        other => panic!("expected Validation error, got {other:?}"),
+    }
 }
