@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use super::nonlocal::{PpInfo, PpNlcc, PpNonlocal, PpPseudoWavefunctions, PpSemilocal};
+use super::{
+    gipaw::PpGipaw,
+    nonlocal::{PpInfo, PpNlcc, PpNonlocal, PpPseudoWavefunctions, PpSemilocal},
+    paw::{PpFullWfc, PpPaw},
+};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename = "UPF")]
@@ -23,8 +27,14 @@ pub struct UpfData {
     pub nonlocal: PpNonlocal,
     #[serde(rename = "PP_PSWFC")]
     pub pswfc: Option<PpPseudoWavefunctions>,
+    #[serde(rename = "PP_FULL_WFC")]
+    pub full_wfc: Option<PpFullWfc>,
     #[serde(rename = "PP_RHOATOM")]
     pub rhoatom: PpRhoAtom,
+    #[serde(rename = "PP_PAW")]
+    pub paw: Option<PpPaw>,
+    #[serde(rename = "PP_GIPAW")]
+    pub gipaw: Option<PpGipaw>,
 }
 
 impl UpfData {
