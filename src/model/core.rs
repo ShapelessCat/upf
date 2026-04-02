@@ -17,10 +17,10 @@ pub struct UpfData {
     pub nlcc: Option<PpNlcc>,
     #[serde(rename = "PP_LOCAL")]
     pub local: PpLocal,
-    #[serde(rename = "PP_NONLOCAL")]
-    pub nonlocal: PpNonlocal,
     #[serde(rename = "PP_SEMILOCAL")]
     pub semilocal: Option<PpSemilocal>,
+    #[serde(rename = "PP_NONLOCAL")]
+    pub nonlocal: PpNonlocal,
     #[serde(rename = "PP_PSWFC")]
     pub pswfc: Option<PpPseudoWavefunctions>,
     #[serde(rename = "PP_RHOATOM")]

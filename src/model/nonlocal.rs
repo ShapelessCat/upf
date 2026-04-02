@@ -1,4 +1,4 @@
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 
 use super::NumericArray;
 
@@ -20,13 +20,13 @@ pub struct PpBeta {
     pub cutoff_radius: f64,
     #[serde(rename = "@ultrasoft_cutoff_radius")]
     pub ultrasoft_cutoff_radius: Option<f64>,
-    #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
+    #[serde(rename = "$text")]
     pub values: Vec<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct PpDij {
-    #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
+    #[serde(rename = "$text")]
     pub values: Vec<f64>,
 }
 
@@ -39,13 +39,11 @@ pub struct PpNonlocal {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum PpBetaNode {
-    #[serde(rename = "PP_BETA.1")]
-    Beta1(PpBeta),
-    #[serde(rename = "PP_BETA.2")]
-    Beta2(PpBeta),
-    #[serde(rename = "PP_BETA.3")]
-    Beta3(PpBeta),
+    Beta1(#[serde(rename = "PP_BETA.1")] PpBeta),
+    Beta2(#[serde(rename = "PP_BETA.2")] PpBeta),
+    Beta3(#[serde(rename = "PP_BETA.3")] PpBeta),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -61,13 +59,11 @@ pub struct PpSemilocal {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum PpSemilocalChannel {
-    #[serde(rename = "PP_VNL1")]
-    Vnl1(PpSemilocalValues),
-    #[serde(rename = "PP_VNL2")]
-    Vnl2(PpSemilocalValues),
-    #[serde(rename = "PP_VNL3")]
-    Vnl3(PpSemilocalValues),
+    Vnl1(#[serde(rename = "PP_VNL1")] PpSemilocalValues),
+    Vnl2(#[serde(rename = "PP_VNL2")] PpSemilocalValues),
+    Vnl3(#[serde(rename = "PP_VNL3")] PpSemilocalValues),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -76,18 +72,16 @@ pub struct PpSemilocalValues {
     pub l: usize,
     #[serde(rename = "@J")]
     pub j: Option<f64>,
-    #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
+    #[serde(rename = "$text")]
     pub values: Vec<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum PpChiNode {
-    #[serde(rename = "PP_CHI.1")]
-    Chi1(PpWavefunction),
-    #[serde(rename = "PP_CHI.2")]
-    Chi2(PpWavefunction),
-    #[serde(rename = "PP_CHI.3")]
-    Chi3(PpWavefunction),
+    Chi1(#[serde(rename = "PP_CHI.1")] PpWavefunction),
+    Chi2(#[serde(rename = "PP_CHI.2")] PpWavefunction),
+    Chi3(#[serde(rename = "PP_CHI.3")] PpWavefunction),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -98,18 +92,8 @@ pub struct PpWavefunction {
     pub l: usize,
     #[serde(rename = "@occupation")]
     pub occupation: Option<f64>,
-    #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
+    #[serde(rename = "$text")]
     pub values: Vec<f64>,
 }
 
 pub type PpNlcc = NumericArray;
-
-fn deserialize_f64_values<'de, D>(deserializer: D) -> Result<Vec<f64>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let text = String::deserialize(deserializer)?;
-    text.split_whitespace()
-        .map(|token| token.parse::<f64>().map_err(serde::de::Error::custom))
-        .collect()
-}
