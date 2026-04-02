@@ -4,9 +4,9 @@ pub fn parse_f64_vec(input: &str) -> Result<Vec<f64>, UpfError> {
     input
         .split_whitespace()
         .map(|token| {
-            token
-                .parse::<f64>()
-                .map_err(|_| UpfError::InvalidFloat { token: token.into() })
+            token.parse::<f64>().map_err(|_| UpfError::InvalidFloat {
+                token: token.into(),
+            })
         })
         .collect()
 }

@@ -37,7 +37,10 @@ const NONLOCAL_UPF: &str = r#"
 fn parses_nonlocal_and_wavefunction_sections() {
     let doc = from_str(NONLOCAL_UPF).unwrap();
 
-    assert_eq!(doc.info.as_ref().unwrap().body_text.trim(), "Generated for test");
+    assert_eq!(
+        doc.info.as_ref().unwrap().body_text.trim(),
+        "Generated for test"
+    );
     assert_eq!(doc.nlcc.as_ref().unwrap().values, vec![0.3, 0.2, 0.1]);
     assert_eq!(doc.semilocal.as_ref().unwrap().channels.len(), 1);
     assert_eq!(doc.nonlocal.betas.len(), 1);

@@ -1,4 +1,8 @@
-use std::{fs, io::Cursor, time::{SystemTime, UNIX_EPOCH}};
+use std::{
+    fs,
+    io::Cursor,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use upf::{UpfError, from_file, from_reader, from_str};
 
