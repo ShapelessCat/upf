@@ -17,6 +17,41 @@ pub struct UpfData {
     pub rhoatom: PpRhoAtom,
 }
 
+impl UpfData {
+    pub fn validate(&self) -> Result<(), crate::UpfError> {
+        let mesh = self.header.mesh_size;
+        if self.mesh.r.values.len() != mesh {
+            return Err(crate::UpfError::Validation(format!(
+                "mesh_size {} does not match PP_R length {}",
+                mesh,
+                self.mesh.r.values.len()
+            )));
+        }
+        if self.mesh.rab.values.len() != mesh {
+            return Err(crate::UpfError::Validation(format!(
+                "mesh_size {} does not match PP_RAB length {}",
+                mesh,
+                self.mesh.rab.values.len()
+            )));
+        }
+        if self.local.values.len() != mesh {
+            return Err(crate::UpfError::Validation(format!(
+                "mesh_size {} does not match PP_LOCAL length {}",
+                mesh,
+                self.local.values.len()
+            )));
+        }
+        if self.rhoatom.values.len() != mesh {
+            return Err(crate::UpfError::Validation(format!(
+                "mesh_size {} does not match PP_RHOATOM length {}",
+                mesh,
+                self.rhoatom.values.len()
+            )));
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PpHeader {
     #[serde(rename = "@generated")]
