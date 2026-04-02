@@ -67,6 +67,15 @@ mod tests {
     }
 
     #[test]
+    fn rejects_invalid_boolean_flags() {
+        let err = parse_bool_flag("maybe").unwrap_err();
+        assert!(matches!(
+            err,
+            UpfError::InvalidBoolFlag { value } if value == "MAYBE"
+        ));
+    }
+
+    #[test]
     fn formats_values_for_round_trip_output() {
         assert_eq!(format_bool_flag(true), "T");
         assert_eq!(format_bool_flag(false), "F");
