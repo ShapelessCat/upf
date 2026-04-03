@@ -10,12 +10,15 @@ The Unified Pseudopotential Format (UPF) specification is here:
 <https://pseudopotentials.quantum-espresso.org/home/unified-pseudopotential-format>.
 
 This repository provides a Rust library that reads Unified Pseudopotential
-Format (UPF) text files and deserializes them into typed Rust structs for
-further computation.
+Format (UPF) text files into typed Rust structs and writes validated
+`UpfData` values back to UPF text, enabling semantic round-trips between file
+content and Rust data.
 
 Project documentation:
 
 - [Project guide](docs/PROJECT.md)
+- [API documentation on docs.rs](https://docs.rs/upf)
+- [Bundled UPF reference](docs/reference/upf-spec.html)
 
 Local verification:
 
@@ -29,3 +32,6 @@ Core API:
 - `upf::from_str`
 - `upf::from_reader`
 - `upf::from_file`
+- `upf::to_string`
+- `upf::to_writer`
+- `upf::to_file`
