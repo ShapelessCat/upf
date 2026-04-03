@@ -1,5 +1,6 @@
 use crate::error::UpfError;
 
+/// Parse a whitespace-delimited UPF numeric field into `f64` values.
 pub fn parse_f64_vec(input: &str) -> Result<Vec<f64>, UpfError> {
     input
         .split_whitespace()
@@ -11,6 +12,7 @@ pub fn parse_f64_vec(input: &str) -> Result<Vec<f64>, UpfError> {
         .collect()
 }
 
+/// Format numeric values the same compact way used by this crate's serializer.
 pub fn format_f64_slice(values: &[f64]) -> String {
     values
         .iter()
@@ -25,6 +27,7 @@ pub fn format_f64_slice(values: &[f64]) -> String {
         .join(" ")
 }
 
+/// Parse a UPF logical flag such as `T`, `.T.`, `FALSE`, or `.FALSE.`.
 pub fn parse_bool_flag(input: &str) -> Result<bool, UpfError> {
     match input.trim().to_ascii_uppercase().as_str() {
         "T" | ".T." | "TRUE" | ".TRUE." => Ok(true),
@@ -35,6 +38,7 @@ pub fn parse_bool_flag(input: &str) -> Result<bool, UpfError> {
     }
 }
 
+/// Format a Rust boolean as the compact UPF flag used in this crate, `T` or `F`.
 pub fn format_bool_flag(value: bool) -> &'static str {
     if value { "T" } else { "F" }
 }
