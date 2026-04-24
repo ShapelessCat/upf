@@ -76,6 +76,37 @@ The crate currently enforces a small set of structural invariants in
 These checks run after deserialization and before serialization, so both read
 and write paths enforce the same structural contract.
 
+## Schema notes
+
+This repository bundles the prose UPF reference in `docs/reference/`, but
+there is also sibling schema work in `/Users/shapeless_cat/MzProjects/upf-schema`
+that is useful for understanding edge cases in real UPF files.
+
+The crate currently follows these documented interpretations:
+
+- `PP_HEADER/@pseudo_type` is modeled as the typed Rust enum
+  `PseudopotentialType` and serializes as the compact UPF values `NC`, `SL`,
+  `1/r`, `US`, and `PAW`.
+- `PP_HEADER/@relativistic` is modeled as
+  `AtomicRelativisticFormalism`. The prose reference uses
+  `nonrelativistic`, `scalar`, and `full`, while the sibling XSD uses `no`,
+  `scalar`, and `full`. The crate accepts both `nonrelativistic` and `no`
+  when reading, and writes the canonical prose spelling
+  `nonrelativistic`.
+- UPF boolean flags are currently treated as `T`/`F` values in this crate.
+  This matches the example fixtures used in the repository and the current
+  round-trip serializer output.
+- The sibling XSD defines a broader `upf-logical` type that accepts both
+  `.true.` / `.false.` and `T` / `F`.
+- Two `PP_HEADER` attributes, `has_wfc` and `paw_as_gipaw`, are typed as
+  `xs:NCName` in the sibling XSD even though the prose reference describes
+  them as booleans. The crate intentionally keeps the stronger boolean
+  interpretation for both fields.
+
+These notes are not an attempt to make the crate schema-driven. They document
+where real-world schema material and the prose reference disagree, and where
+the library has chosen one interpretation for a stable typed API.
+
 ## Supported UPF sections
 
 The current top-level model covers these sections:

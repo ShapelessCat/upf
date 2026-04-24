@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Future qe_pp:pseudo form after UPF v2.0.1 -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:qe_pp="http://www.quantum-espresso.org/ns/qes/qe_pp-1.0"
+           targetNamespace="http://www.quantum-espresso.org/ns/qes/qe_pp-1.0"
+           elementFormDefault="unqualified"
+           attributeFormDefault="unqualified">
+
+  <xs:annotation>
+    <xs:documentation>
+      QE-practical future UPF schema. This models the qe_pp:pseudo form handled by
+      upflib/read_upf_new.f90 and write_upf_new.f90. In QE's practical output,
+      the root element is namespaced as qe_pp:pseudo while the child elements are
+      written as unqualified names.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:simpleType name="logical">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="true"/>
+      <xs:enumeration value="false"/>
+      <xs:enumeration value="T"/>
+      <xs:enumeration value="F"/>
+      <xs:enumeration value=".true."/>
+      <xs:enumeration value=".false."/>
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:attributeGroup name="dataAttrs">
+    <xs:attribute name="type" type="xs:string" use="optional"/>
+    <xs:attribute name="size" type="xs:integer" use="optional"/>
+    <xs:attribute name="columns" type="xs:integer" use="optional"/>
+    <xs:attribute name="rows" type="xs:integer" use="optional"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="dataSection">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="indexedOrbitalSection">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+        <xs:attribute name="index" type="xs:integer" use="optional"/>
+        <xs:attribute name="label" type="xs:string" use="optional"/>
+        <xs:attribute name="l" type="xs:integer" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="chiSection">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+        <xs:attribute name="index" type="xs:integer" use="optional"/>
+        <xs:attribute name="label" type="xs:string" use="optional"/>
+        <xs:attribute name="l" type="xs:integer" use="required"/>
+        <xs:attribute name="occupation" type="xs:double" use="required"/>
+        <xs:attribute name="n" type="xs:integer" use="optional"/>
+        <xs:attribute name="pseudo_energy" type="xs:double" use="optional"/>
+        <xs:attribute name="cutoff_radius" type="xs:double" use="optional"/>
+        <xs:attribute name="ultrasoft_cutoff_radius" type="xs:double" use="optional"/>
+        <xs:attribute name="jchi" type="xs:double" use="optional"/>
+        <xs:attribute name="nn" type="xs:integer" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="betaSection">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+        <xs:attribute name="index" type="xs:integer" use="optional"/>
+        <xs:attribute name="label" type="xs:string" use="optional"/>
+        <xs:attribute name="angular_momentum" type="xs:integer" use="required"/>
+        <xs:attribute name="cutoff_radius_index" type="xs:integer" use="optional"/>
+        <xs:attribute name="cutoff_radius" type="xs:double" use="optional"/>
+        <xs:attribute name="ultrasoft_cutoff_radius" type="xs:double" use="optional"/>
+        <xs:attribute name="tot_ang_mom" type="xs:double" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="qijSection">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+        <xs:attribute name="first_index" type="xs:integer" use="optional"/>
+        <xs:attribute name="second_index" type="xs:integer" use="optional"/>
+        <xs:attribute name="composite_index" type="xs:integer" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="qijlSection">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+        <xs:attribute name="first_index" type="xs:integer" use="optional"/>
+        <xs:attribute name="second_index" type="xs:integer" use="optional"/>
+        <xs:attribute name="composite_index" type="xs:integer" use="required"/>
+        <xs:attribute name="angular_momentum" type="xs:integer" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="gipawCoreOrbital">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+        <xs:attribute name="index" type="xs:integer" use="optional"/>
+        <xs:attribute name="label" type="xs:string" use="required"/>
+        <xs:attribute name="n" type="xs:integer" use="required"/>
+        <xs:attribute name="l" type="xs:integer" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="gipawOrbital">
+    <xs:sequence>
+      <xs:element name="pp_gipaw_wfs_ae" type="qe_pp:dataSection"/>
+      <xs:element name="pp_gipaw_wfs_ps" type="qe_pp:dataSection"/>
+    </xs:sequence>
+    <xs:attribute name="index" type="xs:integer" use="optional"/>
+    <xs:attribute name="label" type="xs:string" use="required"/>
+    <xs:attribute name="l" type="xs:integer" use="required"/>
+    <xs:attribute name="cutoff_radius" type="xs:double" use="required"/>
+    <xs:attribute name="ultrasoft_cutoff_radius" type="xs:double" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="pseudoRoot">
+    <xs:sequence>
+      <xs:element name="xsd_version" type="xs:string" minOccurs="0"/>
+      <xs:element name="pp_info" minOccurs="0">
+        <xs:complexType mixed="true">
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_header">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="element" type="xs:string"/>
+            <xs:element name="z_valence" type="xs:double"/>
+            <xs:element name="type" type="xs:string"/>
+            <xs:element name="functional" type="xs:string"/>
+            <xs:element name="relativistic" type="xs:string"/>
+            <xs:element name="is_ultrasoft" type="qe_pp:logical"/>
+            <xs:element name="is_paw" type="qe_pp:logical"/>
+            <xs:element name="is_coulomb" type="qe_pp:logical"/>
+            <xs:element name="has_so" type="qe_pp:logical"/>
+            <xs:element name="has_wfc" type="qe_pp:logical"/>
+            <xs:element name="has_gipaw" type="qe_pp:logical"/>
+            <xs:element name="paw_as_gipaw" type="qe_pp:logical"/>
+            <xs:element name="core_correction" type="qe_pp:logical"/>
+            <xs:element name="with_metagga_info" type="qe_pp:logical"/>
+            <xs:element name="total_psenergy" type="xs:double"/>
+            <xs:element name="wfc_cutoff" type="xs:double"/>
+            <xs:element name="rho_cutoff" type="xs:double"/>
+            <xs:element name="l_max" type="xs:integer"/>
+            <xs:element name="l_max_rho" type="xs:integer"/>
+            <xs:element name="l_local" type="xs:integer"/>
+            <xs:element name="mesh_size" type="xs:integer"/>
+            <xs:element name="number_of_wfc" type="xs:integer"/>
+            <xs:element name="number_of_proj" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_mesh">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="pp_r" type="qe_pp:dataSection"/>
+            <xs:element name="pp_rab" type="qe_pp:dataSection"/>
+          </xs:sequence>
+          <xs:attribute name="dx" type="xs:double" use="optional"/>
+          <xs:attribute name="mesh" type="xs:integer" use="optional"/>
+          <xs:attribute name="xmin" type="xs:double" use="optional"/>
+          <xs:attribute name="rmax" type="xs:double" use="optional"/>
+          <xs:attribute name="zmesh" type="xs:double" use="optional"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_nlcc" type="qe_pp:dataSection" minOccurs="0"/>
+      <xs:element name="pp_local" type="qe_pp:dataSection" minOccurs="0"/>
+      <xs:element name="pp_semilocal" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="vnl" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:simpleContent>
+                  <xs:extension base="xs:string">
+                    <xs:attributeGroup ref="qe_pp:dataAttrs"/>
+                    <xs:attribute name="l" type="xs:integer" use="required"/>
+                    <xs:attribute name="j" type="xs:double" use="optional"/>
+                  </xs:extension>
+                </xs:simpleContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_nonlocal" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="pp_beta" type="qe_pp:betaSection" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="pp_dij" type="qe_pp:dataSection" minOccurs="0"/>
+            <xs:element name="pp_augmentation" minOccurs="0">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="q_with_l" type="qe_pp:logical"/>
+                  <xs:element name="nqf" type="xs:integer"/>
+                  <xs:element name="nqlc" type="xs:integer"/>
+                  <xs:element name="shape" type="xs:string" minOccurs="0"/>
+                  <xs:element name="cutoff_r" type="xs:double" minOccurs="0"/>
+                  <xs:element name="cutoff_r_index" type="xs:integer" minOccurs="0"/>
+                  <xs:element name="augmentation_epsilon" type="xs:double" minOccurs="0"/>
+                  <xs:element name="l_max_aug" type="xs:integer" minOccurs="0"/>
+                  <xs:element name="pp_q" type="qe_pp:dataSection"/>
+                  <xs:element name="pp_multipoles" type="qe_pp:dataSection" minOccurs="0"/>
+                  <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="pp_qij" type="qe_pp:qijSection"/>
+                    <xs:element name="pp_qijl" type="qe_pp:qijlSection"/>
+                  </xs:choice>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_pswfc">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="pp_chi" type="qe_pp:chiSection" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_full_wfc" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="pp_aewfc" type="qe_pp:indexedOrbitalSection" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="pp_aewfc_rel" type="qe_pp:indexedOrbitalSection" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="pp_pswfc" type="qe_pp:indexedOrbitalSection" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:attribute name="number_of_wfc" type="xs:integer" use="optional"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_rhoatom" type="qe_pp:dataSection"/>
+      <xs:element name="pp_taumod" type="qe_pp:dataSection" minOccurs="0"/>
+      <xs:element name="pp_tauatom" type="qe_pp:dataSection" minOccurs="0"/>
+      <xs:element name="pp_paw" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="pp_occupations" type="qe_pp:dataSection"/>
+            <xs:element name="pp_ae_nlcc" type="qe_pp:dataSection"/>
+            <xs:element name="pp_ae_vloc" type="qe_pp:dataSection"/>
+          </xs:sequence>
+          <xs:attribute name="paw_data_format" type="xs:integer" use="required"/>
+          <xs:attribute name="core_energy" type="xs:double" use="optional"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_gipaw" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="number_of_core_orbitals" type="xs:integer"/>
+            <xs:element name="number_of_valence_orbitals" type="xs:integer" minOccurs="0"/>
+            <xs:element name="pp_gipaw_core_orbital" type="qe_pp:gipawCoreOrbital" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="pp_gipaw_orbital" type="qe_pp:gipawOrbital" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="pp_gipaw_vlocal" minOccurs="0">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="pp_gipaw_vlocal_ae" type="qe_pp:dataSection"/>
+                  <xs:element name="pp_gipaw_vlocal_ps" type="qe_pp:dataSection"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="gipaw_data_format" type="xs:integer" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="pseudo" type="qe_pp:pseudoRoot"/>
+</xs:schema>
