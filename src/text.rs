@@ -1,4 +1,5 @@
 use crate::error::UpfError;
+use serde::{Deserialize, Deserializer, Serializer};
 
 /// Parse a whitespace-delimited UPF numeric field into `f64` values.
 pub fn parse_f64_vec(input: &str) -> Result<Vec<f64>, UpfError> {
@@ -27,11 +28,11 @@ pub fn format_f64_slice(values: &[f64]) -> String {
         .join(" ")
 }
 
-/// Parse a UPF logical flag such as `T`, `.T.`, `FALSE`, or `.FALSE.`.
+/// Parse a UPF logical flag such as `T` or `F`.
 pub fn parse_bool_flag(input: &str) -> Result<bool, UpfError> {
     match input.trim().to_ascii_uppercase().as_str() {
-        "T" | ".T." | "TRUE" | ".TRUE." => Ok(true),
-        "F" | ".F." | "FALSE" | ".FALSE." => Ok(false),
+        "T" | "TRUE" => Ok(true),
+        "F" | "FALSE" => Ok(false),
         other => Err(UpfError::InvalidBoolFlag {
             value: other.to_string(),
         }),
@@ -41,6 +42,23 @@ pub fn parse_bool_flag(input: &str) -> Result<bool, UpfError> {
 /// Format a Rust boolean as the compact UPF flag used in this crate, `T` or `F`.
 pub fn format_bool_flag(value: bool) -> &'static str {
     if value { "T" } else { "F" }
+}
+
+/// Deserialize a UPF logical flag into a Rust `bool`.
+pub(crate) fn deserialize_bool_flag<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let text = String::deserialize(deserializer)?;
+    parse_bool_flag(&text).map_err(serde::de::Error::custom)
+}
+
+/// Serialize a Rust `bool` as the compact UPF `T`/`F` representation.
+pub(crate) fn serialize_bool_flag<S>(value: &bool, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(format_bool_flag(*value))
 }
 
 #[cfg(test)]
@@ -65,9 +83,9 @@ mod tests {
     #[test]
     fn parses_upf_boolean_flags() {
         assert!(parse_bool_flag("T").unwrap());
-        assert!(parse_bool_flag(".TRUE.").unwrap());
+        assert!(parse_bool_flag("true").unwrap());
         assert!(!parse_bool_flag("F").unwrap());
-        assert!(!parse_bool_flag(".FALSE.").unwrap());
+        assert!(!parse_bool_flag("FALSE").unwrap());
     }
 
     #[test]
