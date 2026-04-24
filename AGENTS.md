@@ -28,7 +28,7 @@ documents whose required section relationships or array lengths are invalid.
 - `src/text.rs`: helpers for parsing/formatting float lists and UPF boolean
   flags, with unit tests.
 - `tests/*.rs`: integration tests using small inline UPF fixtures.
-- `docs/reference/upf-spec.html`: local copy of the external UPF reference.
+- `docs/reference/upf-spec.html`: local copy of the external UPF reference. It is not clear, you need to use it together with `docs/reference/upf.xsd` for better understanding and more exact info.
 
 ## Working conventions
 
