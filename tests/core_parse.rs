@@ -38,9 +38,9 @@ fn minimal_document_deserializes_core_sections() {
         doc.header.relativistic,
         AtomicRelativisticFormalism::ScalarRelativistic
     );
-    assert_eq!(doc.mesh.r.values, vec![0.0, 0.1, 0.2]);
-    assert_eq!(doc.local.values, vec![1.0, 2.0, 3.0]);
-    assert_eq!(doc.rhoatom.values, vec![0.2, 0.3, 0.4]);
+    assert_eq!(doc.mesh.r, vec![0.0, 0.1, 0.2]);
+    assert_eq!(doc.local, vec![1.0, 2.0, 3.0]);
+    assert_eq!(doc.rhoatom, vec![0.2, 0.3, 0.4]);
 }
 
 #[test]
@@ -89,5 +89,5 @@ fn mesh_sized_core_sections_reject_length_mismatch() {
 
     let err = from_str(xml).unwrap_err();
     assert!(err.to_string().contains("PP_R"));
-    assert!(err.to_string().contains("mesh_size"));
+    assert!(err.to_string().contains("expected size 3"));
 }

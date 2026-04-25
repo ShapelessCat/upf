@@ -28,13 +28,14 @@ const HEADER_BOOL_FLAGS_UPF: &str = r#"
     l_local="0"
     mesh_size="3"
     number_of_wfc="0"
-    number_of_proj="0" />
+    number_of_proj="1" />
   <PP_MESH dx="0.1" mesh="3" xmin="0.0" rmax="0.2" zmesh="1.0">
     <PP_R>0.0 0.1 0.2</PP_R>
     <PP_RAB>0.1 0.1 0.1</PP_RAB>
   </PP_MESH>
   <PP_LOCAL>1.0 2.0 3.0</PP_LOCAL>
   <PP_NONLOCAL>
+    <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
     <PP_AUGMENTATION q_with_l="T" nqf="0" nqlc="1">
       <PP_Q type="real" size="1">0.0</PP_Q>
     </PP_AUGMENTATION>

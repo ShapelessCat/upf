@@ -48,6 +48,6 @@ fn parses_explicit_gipaw_orbitals_and_vlocal_from_real_examples() {
         gipaw.orbitals.as_ref().unwrap().orbitals.len()
     );
     assert!(!gipaw.orbitals.as_ref().unwrap().orbitals.is_empty());
-    assert!(!gipaw.vlocal.as_ref().unwrap().ae.values.is_empty());
-    assert!(!gipaw.vlocal.as_ref().unwrap().ps.values.is_empty());
+    assert!(!gipaw.vlocal.as_ref().unwrap().ae.is_empty());
+    assert!(!gipaw.vlocal.as_ref().unwrap().ps.is_empty());
 }

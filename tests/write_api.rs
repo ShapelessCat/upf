@@ -49,13 +49,31 @@ fn writer_entry_point_emits_xml() {
 }
 
 #[test]
+fn writer_emits_computed_size_without_type_or_columns_for_plain_numeric_sections() {
+    let doc = from_str(SAMPLE).unwrap();
+    let mut buf = Cursor::new(Vec::new());
+
+    to_writer(&mut buf, &doc).unwrap();
+
+    let xml = String::from_utf8(buf.into_inner()).unwrap();
+    assert!(xml.contains("<PP_R size=\"3\">"));
+    assert!(xml.contains("<PP_RAB size=\"3\">"));
+    assert!(xml.contains("<PP_LOCAL size=\"3\">"));
+    assert!(xml.contains("<PP_RHOATOM size=\"3\">"));
+    assert!(!xml.contains("<PP_R type="));
+    assert!(!xml.contains("<PP_R columns="));
+    assert!(!xml.contains("<PP_LOCAL type="));
+    assert!(!xml.contains("<PP_RHOATOM columns="));
+}
+
+#[test]
 fn file_entry_point_writes_to_disk() {
     let doc = from_str(SAMPLE).unwrap();
     let path = std::env::temp_dir().join("upf-write-api.upf");
     to_file(&path, &doc).unwrap();
 
     let xml = fs::read_to_string(&path).unwrap();
-    assert!(xml.contains("<PP_RHOATOM>"));
+    assert!(xml.contains("<PP_RHOATOM size=\"3\">"));
 }
 
 #[test]
@@ -113,6 +131,46 @@ fn writer_emits_extended_sections() {
     assert!(written.contains("PP_RELBETA.3"));
     assert!(written.contains("PP_GIPAW_ORBITAL.1"));
     assert!(written.contains("PP_GIPAW_VLOCAL_AE"));
+}
+
+#[test]
+fn writer_recomputes_pp_dij_size_without_preserving_read_time_type_rows_or_columns() {
+    let xml = r#"
+    <UPF version="2.0.1">
+      <PP_HEADER generated="unit" author="tester" date="2026-04-03" comment="dij-write"
+                 element="Ne" pseudo_type="USPP" relativistic="scalar"
+                 is_ultrasoft="T" is_paw="F" is_coulomb="F"
+                 has_so="F" has_wfc="F" has_gipaw="F" core_correction="F"
+                 functional="PBE"
+                 z_valence="8.0" total_psenergy="-1.0"
+                 l_max="1" mesh_size="2" number_of_wfc="0" number_of_proj="2" />
+      <PP_MESH mesh="2">
+        <PP_R>0.0 0.1</PP_R>
+        <PP_RAB>0.1 0.1</PP_RAB>
+      </PP_MESH>
+      <PP_LOCAL>1.0 1.1</PP_LOCAL>
+      <PP_NONLOCAL>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1 0.2</PP_BETA.1>
+        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.1">0.3 0.4</PP_BETA.2>
+        <PP_DIJ type="real" size="99" rows="9" columns="9">0.1 0.2 0.3 0.4</PP_DIJ>
+        <PP_AUGMENTATION q_with_l="F" nqf="0" nqlc="1">
+          <PP_Q>0.0 0.1 0.2 0.3</PP_Q>
+          <PP_QIJ.1.1 first_index="1" second_index="1" composite_index="1">0.0 0.0</PP_QIJ.1.1>
+        </PP_AUGMENTATION>
+      </PP_NONLOCAL>
+      <PP_RHOATOM>0.2 0.3</PP_RHOATOM>
+    </UPF>
+    "#;
+    let doc = from_str(xml).unwrap();
+    let mut buf = Cursor::new(Vec::new());
+
+    to_writer(&mut buf, &doc).unwrap();
+
+    let written = String::from_utf8(buf.into_inner()).unwrap();
+    assert!(written.contains("<PP_DIJ size=\"4\">"));
+    assert!(!written.contains("<PP_DIJ type="));
+    assert!(!written.contains("rows="));
+    assert!(!written.contains("columns="));
 }
 
 #[test]

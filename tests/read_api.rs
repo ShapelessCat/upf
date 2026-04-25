@@ -92,7 +92,7 @@ fn file_entry_point_reads_from_disk() {
 fn invalid_mesh_lengths_are_rejected() {
     let err = from_str(INVALID_MESH).unwrap_err();
     match err {
-        UpfError::Validation(msg) => assert!(msg.contains("mesh_size")),
+        UpfError::Validation(msg) => assert!(msg.contains("PP_R")),
         other => panic!("expected Validation error, got {other:?}"),
     }
 }
@@ -130,8 +130,8 @@ fn reads_metagga_and_spin_orbit_sections_when_enabled() {
     let doc = from_str(xml).unwrap();
 
     assert!(doc.header.with_metagga_info);
-    assert_eq!(doc.taumod.as_ref().unwrap().values, vec![0.01, 0.02, 0.03]);
-    assert_eq!(doc.tauatom.as_ref().unwrap().values, vec![0.04, 0.05, 0.06]);
+    assert_eq!(doc.taumod.as_ref().unwrap(), &vec![0.01, 0.02, 0.03]);
+    assert_eq!(doc.tauatom.as_ref().unwrap(), &vec![0.04, 0.05, 0.06]);
     assert_eq!(doc.spin_orb.as_ref().unwrap().relwfcs.len(), 1);
     assert_eq!(doc.spin_orb.as_ref().unwrap().relbetas.len(), 1);
     assert_eq!(

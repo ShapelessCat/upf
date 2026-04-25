@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use upf::{from_file, from_str, model::UpfDataType};
+use upf::{from_file, from_str};
 
 fn example(name: &str) -> PathBuf {
     for subdir in ["UPF_1.x", "UPF_2.x"] {
@@ -37,8 +37,7 @@ fn parses_qe_paw_example_with_full_wfc_and_gipaw() {
 
     assert_eq!(doc.header.element, "Fe");
     assert_eq!(doc.nonlocal.betas.len(), 6);
-    assert_eq!(doc.nonlocal.betas[0].value.size, Some(1191));
-    assert_eq!(doc.nonlocal.betas[0].value.columns, Some(4));
+    assert_eq!(doc.nonlocal.betas[0].value.values.len(), doc.header.mesh_size);
     assert_eq!(doc.nonlocal.betas[0].value.label.as_deref(), Some("3S"));
     assert_eq!(doc.nonlocal.betas[0].value.cutoff_radius_index, Some(874));
     assert_eq!(doc.full_wfc.as_ref().unwrap().entries.len(), 12);
@@ -61,7 +60,7 @@ fn parses_lowercase_boolean_paw_example() {
 }
 
 #[test]
-fn preserves_numeric_section_metadata() {
+fn numeric_section_attributes_are_ignored_on_read() {
     let xml = r#"
     <UPF version="2.0.1">
       <PP_HEADER generated="unit" author="tester" date="2026-04-03" comment=""
@@ -85,10 +84,10 @@ fn preserves_numeric_section_metadata() {
 
     let doc = from_str(xml).unwrap();
 
-    assert_eq!(doc.mesh.r.data_type, Some(UpfDataType::Real));
-    assert_eq!(doc.mesh.r.size, Some(3));
-    assert_eq!(doc.mesh.r.columns, Some(4));
-    assert_eq!(doc.local.size, Some(3));
+    assert_eq!(doc.mesh.r, vec![0.0, 0.1, 0.2]);
+    assert_eq!(doc.mesh.rab, vec![0.1, 0.1, 0.1]);
+    assert_eq!(doc.local, vec![1.0, 2.0, 3.0]);
+    assert_eq!(doc.rhoatom, vec![0.2, 0.3, 0.4]);
 }
 
 #[test]

@@ -10,11 +10,12 @@ fn header_accepts_true_false_aliases() {
                  has_so="false" has_wfc="true" has_gipaw="true" paw_as_gipaw="true"
                  core_correction="true" functional="PBE"
                  z_valence="16.0" total_psenergy="-1.0" wfc_cutoff="30.0" rho_cutoff="120.0"
-                 l_max="3" l_max_rho="6" l_local="-2" mesh_size="1" number_of_wfc="0" number_of_proj="0"/>
+                 l_max="3" l_max_rho="6" l_local="-2" mesh_size="1" number_of_wfc="0" number_of_proj="1"/>
       <PP_MESH mesh="1"><PP_R type="real" size="1">0.0</PP_R><PP_RAB type="real" size="1">0.1</PP_RAB></PP_MESH>
       <PP_NLCC type="real" size="1">0.0</PP_NLCC>
       <PP_LOCAL type="real" size="1">0.0</PP_LOCAL>
       <PP_NONLOCAL>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
         <PP_AUGMENTATION q_with_l="true" nqf="0" nqlc="0">
           <PP_Q type="real" size="1">0.0</PP_Q>
         </PP_AUGMENTATION>
@@ -47,10 +48,11 @@ fn header_accepts_dotted_logical_aliases() {
                  is_ultrasoft=".TRUE." is_paw=".FALSE." is_coulomb=".FALSE."
                  has_so=".FALSE." has_wfc=".FALSE." has_gipaw=".FALSE." core_correction=".FALSE."
                  functional="PBE" z_valence="5.0" total_psenergy="-1.0"
-                 l_max="2" mesh_size="1" number_of_wfc="0" number_of_proj="0"/>
+                 l_max="2" mesh_size="1" number_of_wfc="0" number_of_proj="1"/>
       <PP_MESH mesh="1"><PP_R type="real" size="1">0.0</PP_R><PP_RAB type="real" size="1">0.1</PP_RAB></PP_MESH>
       <PP_LOCAL type="real" size="1">0.0</PP_LOCAL>
       <PP_NONLOCAL>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
         <PP_AUGMENTATION q_with_l=".FALSE." nqf="0" nqlc="0">
           <PP_Q type="real" size="1">0.0</PP_Q>
         </PP_AUGMENTATION>
@@ -74,10 +76,11 @@ fn header_accepts_uspp_alias_when_present() {
                  is_ultrasoft="T" is_paw="F" is_coulomb="F"
                  has_so="F" has_wfc="F" has_gipaw="F" core_correction="F"
                  functional="PBE" z_valence="5.0" total_psenergy="-1.0"
-                 l_max="2" mesh_size="1" number_of_wfc="0" number_of_proj="0"/>
+                 l_max="2" mesh_size="1" number_of_wfc="0" number_of_proj="1"/>
       <PP_MESH mesh="1"><PP_R type="real" size="1">0.0</PP_R><PP_RAB type="real" size="1">0.1</PP_RAB></PP_MESH>
       <PP_LOCAL type="real" size="1">0.0</PP_LOCAL>
       <PP_NONLOCAL>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
         <PP_AUGMENTATION q_with_l="T" nqf="0" nqlc="0">
           <PP_Q type="real" size="1">0.0</PP_Q>
         </PP_AUGMENTATION>
