@@ -3,9 +3,13 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::text::deserialize_bool_flag;
 
-use super::{
-    Numbered, NumericSectionTextValueRef, Tagged, numeric_section_vec,
-    numeric_text::deserialize_f64_values, optional_numeric_section_vec,
+use super::internal::{
+    Numbered,
+    NumericSectionTextValueRef,
+    Tagged,
+    deserialize_f64_values,
+    numeric_section_vec,
+    optional_numeric_section_vec,
 };
 
 /// `PP_NONLOCAL` section, containing projector nodes and optional `PP_DIJ`.

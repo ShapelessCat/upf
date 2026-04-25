@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::numeric_text::deserialize_f64_values;
+use crate::model::internal::deserialize_f64_values;
 
 /// A wavefunction-like numeric section used by several UPF containers.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

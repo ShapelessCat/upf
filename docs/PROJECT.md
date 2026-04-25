@@ -47,22 +47,20 @@ custom parser pipeline.
   top-level sections such as `PP_TAUMOD` and `PP_TAUATOM`.
 - `src/model/header.rs`
   Defines `PP_HEADER` and its typed enums.
-- `src/model/info.rs`, `src/model/mesh.rs`, `src/model/data_section.rs`
-  Define `PP_INFO`, `PP_MESH`, and shared numeric section types.
+- `src/model/info.rs`, `src/model/mesh.rs`
+  Define `PP_INFO` and `PP_MESH`.
 - `src/model/nonlocal.rs`, `src/model/semilocal.rs`, `src/model/pseudo_wavefunctions.rs`
   Define `PP_NONLOCAL`, `PP_SEMILOCAL`, `PP_PSWFC`, and related numbered content.
-- `src/model/wavefunction.rs`
-  Defines the shared `PpWavefunction` type used by `PP_CHI.n`, `PP_AEWFC.n`,
-  `PP_PSWFC.n`, and `PP_AEWFC_REL.n` entries (with optional spin-orbit
-  attributes `nn`, `jchi` and optional `n`, `pseudo_energy`, `cutoff_radius`,
-  `ultrasoft_cutoff_radius`).
-- `src/model/numbered.rs`
-  Defines `NumberedTag`, `Numbered<T>`, and `Tagged<T>` for indexed UPF
-  elements like `PP_BETA.n`, `PP_CHI.n`, `PP_QIJL.i.j.l`.
 - `src/model/full_wfc.rs`, `src/model/paw.rs`, `src/model/gipaw.rs`
   Define `PP_FULL_WFC`, `PP_PAW`, `PP_GIPAW`, and their nested structures.
 - `src/model/spin_orb.rs`
   Defines `PP_SPIN_ORB`.
+- `src/model/common.rs`, `src/model/common/wavefunction.rs`
+  Define reusable shared section shapes, currently `PpWavefunction` for
+  `PP_CHI.n`, `PP_AEWFC.n`, `PP_PSWFC.n`, and `PP_AEWFC_REL.n`.
+- `src/model/internal.rs`, `src/model/internal/*.rs`
+  Gather helper types and serde glue such as numbering-aware tag wrappers and
+  numeric section text adapters.
 
 ### Support code
 

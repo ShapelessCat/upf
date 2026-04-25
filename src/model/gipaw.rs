@@ -1,7 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::{Numbered, numeric_section_vec, numeric_text::deserialize_f64_values};
+use super::internal::{Numbered, deserialize_f64_values, numeric_section_vec};
 
 /// `PP_GIPAW` section for datasets that include GIPAW reconstruction data.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

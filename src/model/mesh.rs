@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::numeric_section_vec;
+use super::internal::numeric_section_vec;
 
 /// `PP_MESH` radial grid definition and its two required numeric arrays.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

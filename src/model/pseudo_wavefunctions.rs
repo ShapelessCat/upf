@@ -1,7 +1,8 @@
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::{Numbered, PpWavefunction};
+use super::internal::Numbered;
+use super::common::PpWavefunction;
 
 /// `PP_PSWFC` section containing numbered pseudo-wavefunctions.
 #[derive(Debug, Clone, PartialEq, Deserialize)]

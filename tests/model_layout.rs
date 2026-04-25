@@ -45,10 +45,27 @@ fn model_layout_uses_non_mod_rs_and_dedicated_top_level_type_modules() {
         "src/model/full_wfc.rs",
         "src/model/paw.rs",
         "src/model/gipaw.rs",
-        "src/model/wavefunction.rs",
-        "src/model/numbered.rs",
+        "src/model/spin_orb.rs",
+        "src/model/internal.rs",
+        "src/model/common.rs",
+        "src/model/internal/data_section.rs",
+        "src/model/internal/numeric_text.rs",
+        "src/model/internal/numbered.rs",
+        "src/model/common/wavefunction.rs",
     ] {
         assert!(root.join(path).is_file(), "expected {path} to exist");
+    }
+
+    for path in [
+        "src/model/data_section.rs",
+        "src/model/numeric_text.rs",
+        "src/model/numbered.rs",
+        "src/model/wavefunction.rs",
+    ] {
+        assert!(
+            !root.join(path).exists(),
+            "expected {path} to be replaced by internal/common modules"
+        );
     }
 }
 
@@ -62,10 +79,25 @@ fn model_files_define_parent_items_before_child_items() {
             "mod upf_data;",
             "mod info;",
             "mod header;",
+            "pub mod internal;",
+            "pub mod common;",
             "pub use upf_data::*;",
             "pub use info::*;",
             "pub use header::*;",
         ],
+    );
+    assert_item_order(
+        &std::fs::read_to_string(root.join("src/model/internal.rs")).unwrap(),
+        &[
+            "mod data_section;",
+            "mod numeric_text;",
+            "mod numbered;",
+            "pub use numbered::{Numbered, NumberedTag, Tagged};",
+        ],
+    );
+    assert_item_order(
+        &std::fs::read_to_string(root.join("src/model/common.rs")).unwrap(),
+        &["mod wavefunction;", "pub use wavefunction::PpWavefunction;"],
     );
     assert_item_order(
         &std::fs::read_to_string(root.join("src/model/header.rs")).unwrap(),

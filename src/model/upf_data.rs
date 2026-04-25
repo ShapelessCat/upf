@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     PpAugmentation, PpFullWfc, PpGipaw, PpHeader, PpInfo, PpMesh, PpNonlocal, PpPaw,
-    PpPseudoWavefunctions, PpSemilocal, PpSpinOrb, numeric_section_vec,
-    optional_numeric_section_vec,
+    PpPseudoWavefunctions, PpSemilocal, PpSpinOrb,
 };
+use super::internal::{numeric_section_vec, optional_numeric_section_vec};
 
 /// Root UPF document corresponding to the top-level `<UPF ...> ... </UPF>` tag.
 ///

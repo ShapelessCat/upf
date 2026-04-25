@@ -1,7 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::{Numbered, numeric_text::deserialize_f64_values};
+use super::internal::{Numbered, deserialize_f64_values};
 
 /// `PP_SEMILOCAL` section containing semilocal potential channels.
 #[derive(Debug, Clone, PartialEq, Deserialize)]

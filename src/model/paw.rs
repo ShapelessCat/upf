@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::optional_numeric_section_vec;
+use super::internal::optional_numeric_section_vec;
 
 /// `PP_PAW` section used by PAW datasets.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

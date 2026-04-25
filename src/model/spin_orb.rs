@@ -2,7 +2,7 @@ use serde::de::Error as _;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use super::{Numbered, NumberedTag, Tagged};
+use super::internal::{Numbered, NumberedTag, Tagged};
 
 /// `PP_SPIN_ORB` section containing spin-orbit metadata for wavefunctions and projectors.
 #[derive(Debug, Clone, PartialEq, Default)]

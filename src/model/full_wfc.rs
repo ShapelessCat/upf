@@ -1,7 +1,8 @@
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::{Numbered, PpWavefunction};
+use super::internal::Numbered;
+use super::common::PpWavefunction;
 
 /// `PP_FULL_WFC` section with numbered all-electron and pseudo-wavefunction data.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
