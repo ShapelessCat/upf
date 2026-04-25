@@ -5,7 +5,7 @@
 `upf` is a Rust library for working with Unified Pseudopotential Format (UPF)
 documents as typed Rust data. The current codebase supports both directions:
 
-- read UPF text into a validated [`UpfData`](../src/model/core.rs) structure
+- read UPF text into a validated [`UpfData`](../src/model/upf_data.rs) structure
 - write a validated `UpfData` value back to UPF text
 
 The project is aimed at semantic round-tripping. A document can be parsed,
@@ -42,17 +42,26 @@ custom parser pipeline.
 
 ### Public model
 
-- `src/model/core.rs`
-  Defines the root `UpfData` type, `PP_HEADER`, `PP_MESH`, shared numeric
-  arrays, and the central validation logic.
-- `src/model/nonlocal.rs`
-  Defines `PP_INFO`, `PP_NONLOCAL`, `PP_SEMILOCAL`, `PP_PSWFC`, and related
-  nested nodes.
-- `src/model/paw.rs`
-  Defines PAW-specific sections such as `PP_FULL_WFC`, `PP_PAW`, and
-  `PP_AUGMENTATION`.
-- `src/model/gipaw.rs`
-  Defines GIPAW-specific sections.
+- `src/model/upf_data.rs`
+  Defines the root `UpfData` type and the central validation logic.
+- `src/model/header.rs`
+  Defines `PP_HEADER` and its typed enums.
+- `src/model/info.rs`, `src/model/mesh.rs`, `src/model/data_section.rs`
+  Define `PP_INFO`, `PP_MESH`, and shared numeric section types.
+- `src/model/nonlocal.rs`, `src/model/semilocal.rs`, `src/model/pseudo_wavefunctions.rs`
+  Define `PP_NONLOCAL`, `PP_SEMILOCAL`, `PP_PSWFC`, and related numbered content.
+- `src/model/wavefunction.rs`
+  Defines the shared `PpWavefunction` type used by `PP_CHI.n`, `PP_AEWFC.n`,
+  `PP_PSWFC.n`, and `PP_AEWFC_REL.n` entries (with optional spin-orbit
+  attributes `nn`, `jchi` and optional `n`, `pseudo_energy`, `cutoff_radius`,
+  `ultrasoft_cutoff_radius`).
+- `src/model/numbered.rs`
+  Defines `NumberedTag`, `Numbered<T>`, and `Tagged<T>` for indexed UPF
+  elements like `PP_BETA.n`, `PP_CHI.n`, `PP_QIJL.i.j.l`.
+- `src/model/full_wfc.rs`, `src/model/paw.rs`, `src/model/gipaw.rs`
+  Define `PP_FULL_WFC`, `PP_PAW`, `PP_GIPAW`, and their nested structures.
+- `src/model/metagga.rs`, `src/model/spin_orb.rs`
+  Define `PP_TAUMOD`, `PP_TAUATOM`, and `PP_SPIN_ORB`.
 
 ### Support code
 
@@ -65,16 +74,86 @@ custom parser pipeline.
 
 ## Validation rules
 
-The crate currently enforces a small set of structural invariants in
-`UpfData::validate()`:
+`UpfData::validate()` enforces structural invariants after deserialization and
+before serialization. Both read and write paths share the same contract.
+
+### Mesh and size consistency
 
 - `PP_HEADER/@mesh_size` must match the lengths of `PP_R`, `PP_RAB`,
-  `PP_LOCAL`, and `PP_RHOATOM`
-- `PP_HEADER/@is_paw="T"` requires a `PP_PAW` section
+  `PP_LOCAL`, `PP_RHOATOM`, and any enabled metagga sections
+- Declared `@size` attributes on numeric sections must match their payload
+  lengths (applies to `PP_R`, `PP_RAB`, `PP_LOCAL`, `PP_RHOATOM`, `PP_NLCC`,
+  `PP_TAUMOD`, `PP_TAUATOM`, `PP_Q`, `PP_MULTIPOLES`, `PP_QFCOEF`,
+  `PP_RINNER`, `PP_BETA.n`, `PP_VNL.n`, `PP_CHI.n`, `PP_AEWFC.n`,
+  `PP_PSWFC.n`, `PP_AEWFC_REL.n`, augmentation channels, GIPAW core/valence
+  orbital sections, and PAW sections)
+
+### Required section presence
+
+- `PP_HEADER/@is_paw="T"` requires a `PP_PAW` section (with `PP_OCCUPATIONS`)
 - `PP_HEADER/@has_gipaw="T"` requires a `PP_GIPAW` section
+- `PP_HEADER/@has_so="T"` requires a `PP_SPIN_ORB` section
+- `PP_HEADER/@has_wfc="T"` requires a `PP_FULL_WFC` section
+- `PP_HEADER/@with_metagga_info="T"` requires both `PP_TAUMOD` and `PP_TAUATOM`
+- `PP_HEADER/@core_correction="T"` requires a `PP_NLCC` section
+- Non-Coulomb datasets require `PP_LOCAL`
+- Ultrasoft and PAW datasets require `PP_AUGMENTATION` inside `PP_NONLOCAL`
+
+### Count consistency
+
+- `PP_HEADER/@number_of_proj` must match the number of `PP_BETA.n` entries
+- `PP_HEADER/@number_of_wfc` must match the number of `PP_CHI.n` entries
+  (when > 0)
+- `PP_FULL_WFC/@number_of_wfc` must match entry family counts for
+  `PP_AEWFC.n`, `PP_PSWFC.n`, and `PP_AEWFC_REL.n` (when present)
+- Declared GIPAW core and valence orbital counts must match their numbered
+  entries
+- When `has_so` is true: `PP_RELWFC.n` count must equal `number_of_wfc`
+  and `PP_RELBETA.n` count must equal `number_of_proj` (when > 0)
+
+### Cross-section consistency
+
+- `PP_AEWFC_REL.n` entries are only valid when both `has_so` and `is_paw`
+  are true; when `has_so && is_paw && has_wfc`, at least one must be present
+- When `paw_as_gipaw` is true, `PP_GIPAW_ORBITALS` and `PP_GIPAW_VLOCAL`
+  must be absent (only `PP_GIPAW_CORE_ORBITALS` is allowed)
+- When `q_with_l` is true, augmentation channels must use `PP_QIJL.i.j.l`
+  naming (3 dot-separated indices) with `angular_momentum` present; when
+  false, channels must use `PP_QIJ.i.j` naming (2 indices) without
+  `angular_momentum`
 
 These checks run after deserialization and before serialization, so both read
 and write paths enforce the same structural contract.
+
+## Schema notes
+
+This repository bundles the prose UPF reference in `docs/reference/`, but
+there is also sibling schema work in `/Users/shapeless_cat/MzProjects/upf-schema`
+that is useful for understanding edge cases in real UPF files.
+
+The crate currently follows these documented interpretations:
+
+- `PP_HEADER/@pseudo_type` is modeled as the typed Rust enum
+  `PseudopotentialType` and serializes as the compact UPF values `NC`, `SL`,
+  `1/r`, `US`, and `PAW`.
+- `PP_HEADER/@relativistic` is modeled as
+  `AtomicRelativisticFormalism`. QE writes `no`, `scalar`, and `full`.
+  The older prose reference used `nonrelativistic` for the first variant.
+  The crate serializes the canonical QE spelling `no` and accepts
+  `nonrelativistic` as an alias on input.
+- UPF boolean flags are currently treated as `T`/`F` values in this crate.
+  This matches the example fixtures used in the repository and the current
+  round-trip serializer output.
+- The sibling XSD defines a broader `upf-logical` type that accepts both
+  `.true.` / `.false.` and `T` / `F`.
+- Two `PP_HEADER` attributes, `has_wfc` and `paw_as_gipaw`, are typed as
+  `xs:NCName` in the sibling XSD even though the prose reference describes
+  them as booleans. The crate intentionally keeps the stronger boolean
+  interpretation for both fields.
+
+These notes are not an attempt to make the crate schema-driven. They document
+where real-world schema material and the prose reference disagree, and where
+the library has chosen one interpretation for a stable typed API.
 
 ## Supported UPF sections
 
@@ -90,12 +169,16 @@ The current top-level model covers these sections:
 - `PP_PSWFC`
 - `PP_FULL_WFC`
 - `PP_RHOATOM`
+- `PP_TAUMOD`
+- `PP_TAUATOM`
+- `PP_SPIN_ORB`
 - `PP_PAW`
 - `PP_GIPAW`
 
 Optional sections are represented as `Option<T>`. Repeated numbered tags such
-as `PP_BETA.n`, `PP_CHI.n`, and PAW/GIPAW entry lists are represented with enums
-and vectors that match the serialized UPF tags.
+as `PP_BETA.n`, `PP_VNL.n`, `PP_CHI.n`, `PP_RELWFC.n`, and PAW/GIPAW entry
+lists are represented with numbering-aware structs and vectors that match the
+serialized UPF tags.
 
 ## Current scope and limitations
 
