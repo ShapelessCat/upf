@@ -7,7 +7,6 @@
 #[rustfmt::skip] mod upf_data;
 #[rustfmt::skip] mod info;
 #[rustfmt::skip] mod header;
-#[rustfmt::skip] mod metagga;
 #[rustfmt::skip] mod mesh;
 #[rustfmt::skip] mod semilocal;
 #[rustfmt::skip] mod nonlocal;
@@ -24,7 +23,6 @@
 #[rustfmt::skip] pub use upf_data::*;
 #[rustfmt::skip] pub use info::*;
 #[rustfmt::skip] pub use header::*;
-#[rustfmt::skip] pub use metagga::*;
 #[rustfmt::skip] pub use mesh::*;
 #[rustfmt::skip] pub use semilocal::*;
 #[rustfmt::skip] pub use nonlocal::*;

@@ -135,15 +135,11 @@ fn reads_metagga_and_spin_orbit_sections_when_enabled() {
     assert_eq!(doc.spin_orb.as_ref().unwrap().relwfcs.len(), 1);
     assert_eq!(doc.spin_orb.as_ref().unwrap().relbetas.len(), 1);
     assert_eq!(
-        doc.spin_orb.as_ref().unwrap().relwfcs[0]
-            .tag
-            .to_string(),
+        doc.spin_orb.as_ref().unwrap().relwfcs[0].tag.to_string(),
         "PP_RELWFC.2"
     );
     assert_eq!(
-        doc.spin_orb.as_ref().unwrap().relbetas[0]
-            .tag
-            .to_string(),
+        doc.spin_orb.as_ref().unwrap().relbetas[0].tag.to_string(),
         "PP_RELBETA.3"
     );
 }

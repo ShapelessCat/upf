@@ -43,7 +43,8 @@ custom parser pipeline.
 ### Public model
 
 - `src/model/upf_data.rs`
-  Defines the root `UpfData` type and the central validation logic.
+  Defines the root `UpfData` type and the central validation logic, including
+  top-level sections such as `PP_TAUMOD` and `PP_TAUATOM`.
 - `src/model/header.rs`
   Defines `PP_HEADER` and its typed enums.
 - `src/model/info.rs`, `src/model/mesh.rs`, `src/model/data_section.rs`
@@ -60,8 +61,8 @@ custom parser pipeline.
   elements like `PP_BETA.n`, `PP_CHI.n`, `PP_QIJL.i.j.l`.
 - `src/model/full_wfc.rs`, `src/model/paw.rs`, `src/model/gipaw.rs`
   Define `PP_FULL_WFC`, `PP_PAW`, `PP_GIPAW`, and their nested structures.
-- `src/model/metagga.rs`, `src/model/spin_orb.rs`
-  Define `PP_TAUMOD`, `PP_TAUATOM`, and `PP_SPIN_ORB`.
+- `src/model/spin_orb.rs`
+  Defines `PP_SPIN_ORB`.
 
 ### Support code
 
