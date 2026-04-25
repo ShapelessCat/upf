@@ -1,20 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use super::UpfDataType;
 use super::numeric_text::deserialize_f64_values;
 
 /// A wavefunction-like numeric section used by several UPF containers.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PpWavefunction {
-    /// UPF numeric type in attribute `type`.
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    /// Declared element count in attribute `size`.
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    /// Display column hint in attribute `columns`.
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
     /// Orbital index in attribute `index`.
     #[serde(rename = "@index", default, skip_serializing_if = "Option::is_none")]
     pub index: Option<usize>,

@@ -79,7 +79,7 @@ fn model_files_define_parent_items_before_child_items() {
         &std::fs::read_to_string(root.join("src/model/nonlocal.rs")).unwrap(),
         &[
             "pub struct PpNonlocal",
-            "pub struct PpDij",
+            "pub type PpDij",
             "pub struct PpBeta",
         ],
     );

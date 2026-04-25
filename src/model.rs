@@ -34,5 +34,9 @@
 #[rustfmt::skip] pub use gipaw::*;
 #[rustfmt::skip] pub use spin_orb::*;
 #[rustfmt::skip] pub use wavefunction::*;
-#[rustfmt::skip] pub use data_section::*;
+#[rustfmt::skip] pub(crate) use data_section::{
+    NumericSectionTextValueRef,
+    numeric_section_vec,
+    optional_numeric_section_vec,
+};
 #[rustfmt::skip] pub use numbered::*;

@@ -1,56 +1,103 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 
 use crate::text::{format_f64_slice, parse_f64_vec};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum UpfDataType {
-    #[serde(rename = "character")]
-    Character,
-    #[serde(rename = "logical")]
-    Logical,
-    #[serde(rename = "integer")]
-    Integer,
-    #[serde(rename = "real")]
-    Real,
-    #[serde(rename = "complex")]
-    Complex,
+#[derive(Debug, Deserialize)]
+struct NumericSectionText {
+    #[serde(rename = "@type", default)]
+    _data_type: Option<String>,
+    #[serde(rename = "@size", default)]
+    _size: Option<usize>,
+    #[serde(rename = "@columns", default)]
+    _columns: Option<usize>,
+    #[serde(rename = "$text", deserialize_with = "deserialize_numeric_section_text")]
+    values: Vec<f64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct NumericSection {
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
-    #[serde(
-        rename = "$text",
-        deserialize_with = "deserialize_numeric_section_values",
-        serialize_with = "serialize_numeric_section_values"
-    )]
-    pub values: Vec<f64>,
+#[derive(Serialize)]
+struct NumericSectionTextRef<'a> {
+    #[serde(rename = "@size")]
+    size: usize,
+    #[serde(rename = "$text", serialize_with = "serialize_numeric_section_text")]
+    values: &'a [f64],
 }
 
-impl NumericSection {
-    pub fn len(&self) -> usize {
-        self.values.len()
-    }
+pub(crate) struct NumericSectionTextValueRef<'a>(pub &'a [f64]);
 
-    pub fn is_empty(&self) -> bool {
-        self.values.is_empty()
+impl Serialize for NumericSectionTextValueRef<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        NumericSectionTextRef {
+            size: self.0.len(),
+            values: self.0,
+        }
+        .serialize(serializer)
     }
 }
 
-fn deserialize_numeric_section_values<'de, D>(deserializer: D) -> Result<Vec<f64>, D::Error>
+pub(crate) mod numeric_section_vec {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    use super::{NumericSectionText, NumericSectionTextRef};
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<f64>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        NumericSectionText::deserialize(deserializer).map(|section| section.values)
+    }
+
+    pub fn serialize<S>(values: &[f64], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        NumericSectionTextRef {
+            size: values.len(),
+            values,
+        }
+        .serialize(serializer)
+    }
+}
+
+pub(crate) mod optional_numeric_section_vec {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    use super::{NumericSectionText, NumericSectionTextRef};
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Vec<f64>>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Option::<NumericSectionText>::deserialize(deserializer)
+            .map(|section| section.map(|section| section.values))
+    }
+
+    pub fn serialize<S>(values: &Option<Vec<f64>>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match values {
+            Some(values) => NumericSectionTextRef {
+                size: values.len(),
+                values,
+            }
+            .serialize(serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+}
+
+fn deserialize_numeric_section_text<'de, D>(deserializer: D) -> Result<Vec<f64>, D::Error>
 where
-    D: Deserializer<'de>,
+    D: serde::Deserializer<'de>,
 {
     let text = String::deserialize(deserializer)?;
     parse_f64_vec(&text).map_err(serde::de::Error::custom)
 }
 
-fn serialize_numeric_section_values<S>(values: &[f64], serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_numeric_section_text<S>(values: &[f64], serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {

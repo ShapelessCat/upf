@@ -37,7 +37,10 @@ fn parses_qe_paw_example_with_full_wfc_and_gipaw() {
 
     assert_eq!(doc.header.element, "Fe");
     assert_eq!(doc.nonlocal.betas.len(), 6);
-    assert_eq!(doc.nonlocal.betas[0].value.values.len(), doc.header.mesh_size);
+    assert_eq!(
+        doc.nonlocal.betas[0].value.values.len(),
+        doc.header.mesh_size
+    );
     assert_eq!(doc.nonlocal.betas[0].value.label.as_deref(), Some("3S"));
     assert_eq!(doc.nonlocal.betas[0].value.cutoff_radius_index, Some(874));
     assert_eq!(doc.full_wfc.as_ref().unwrap().entries.len(), 12);

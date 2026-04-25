@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::NumericSection;
+use super::numeric_section_vec;
 
 /// `PP_MESH` radial grid definition and its two required numeric arrays.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -21,9 +21,11 @@ pub struct PpMesh {
     #[serde(rename = "@zmesh", default, skip_serializing_if = "Option::is_none")]
     pub zmesh: Option<f64>,
     /// Radial coordinate samples in tag `PP_R`.
-    #[serde(rename = "PP_R")]
-    pub r: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_R", with = "numeric_section_vec")]
+    pub r: Vec<f64>,
     /// Radial step samples in tag `PP_RAB`.
-    #[serde(rename = "PP_RAB")]
-    pub rab: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_RAB", with = "numeric_section_vec")]
+    pub rab: Vec<f64>,
 }

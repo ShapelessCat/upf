@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::text::deserialize_bool_flag;
 
-use super::{Numbered, NumericSection, Tagged, UpfDataType, numeric_text::deserialize_f64_values};
+use super::{
+    Numbered, NumericSectionTextValueRef, Tagged, numeric_section_vec,
+    numeric_text::deserialize_f64_values, optional_numeric_section_vec,
+};
 
 /// `PP_NONLOCAL` section, containing projector nodes and optional `PP_DIJ`.
 #[derive(Debug, Clone, PartialEq, Deserialize, Default)]
@@ -12,7 +15,12 @@ pub struct PpNonlocal {
     #[serde(rename = "$value", default)]
     pub betas: Vec<Numbered<PpBeta>>,
     /// Coupling matrix in tag `PP_DIJ`.
-    #[serde(rename = "PP_DIJ", default, skip_serializing_if = "PpDij::is_empty")]
+    #[serde(
+        rename = "PP_DIJ",
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        with = "numeric_section_vec"
+    )]
     pub dij: PpDij,
     /// Augmentation block in tag `PP_AUGMENTATION`.
     #[serde(
@@ -41,7 +49,7 @@ impl Serialize for PpNonlocal {
             map.serialize_entry(&beta.tag.as_str(), &beta.value)?;
         }
         if !self.dij.is_empty() {
-            map.serialize_entry("PP_DIJ", &self.dij)?;
+            map.serialize_entry("PP_DIJ", &NumericSectionTextValueRef(&self.dij))?;
         }
         if let Some(augmentation) = &self.augmentation {
             map.serialize_entry("PP_AUGMENTATION", augmentation)?;
@@ -57,42 +65,11 @@ impl PpNonlocal {
 }
 
 /// `PP_DIJ` matrix data stored as a flat numeric list.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct PpDij {
-    /// UPF numeric type in attribute `type`.
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    /// Declared element count in attribute `size`.
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    /// Row count in attribute `rows`.
-    #[serde(rename = "@rows", default, skip_serializing_if = "Option::is_none")]
-    pub rows: Option<usize>,
-    /// Column count in attribute `columns`.
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
-    #[serde(rename = "$text", deserialize_with = "deserialize_f64_values")]
-    pub values: Vec<f64>,
-}
-
-impl PpDij {
-    fn is_empty(&self) -> bool {
-        self.values.is_empty()
-    }
-}
+pub type PpDij = Vec<f64>;
 
 /// A numbered `PP_BETA.n` projector entry inside `PP_NONLOCAL`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PpBeta {
-    /// UPF numeric type in attribute `type`.
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    /// Declared element count in attribute `size`.
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    /// Display column hint in attribute `columns`.
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
     /// Projector index in attribute `index`.
     #[serde(rename = "@index")]
     pub index: usize,
@@ -175,30 +152,42 @@ pub struct PpAugmentation {
     #[serde(rename = "@raug", default, skip_serializing_if = "Option::is_none")]
     pub raug: Option<f64>,
     /// Integrated q matrix in tag `PP_Q`.
-    #[serde(rename = "PP_Q", default, skip_serializing_if = "Option::is_none")]
-    pub q: Option<NumericSection>,
+    /// Expected size: `header.number_of_proj * header.number_of_proj`.
+    #[serde(
+        rename = "PP_Q",
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
+    )]
+    pub q: Option<Vec<f64>>,
     /// PAW multipoles in tag `PP_MULTIPOLES`.
+    /// Expected size: `header.number_of_proj * header.number_of_proj * (2 * header.l_max + 1)`.
     #[serde(
         rename = "PP_MULTIPOLES",
         default,
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
     )]
-    pub multipoles: Option<NumericSection>,
+    pub multipoles: Option<Vec<f64>>,
     /// Taylor-expansion coefficients in tag `PP_QFCOEF`.
+    /// Expected size: `augmentation.nqf * effective_nqlc * header.number_of_proj * header.number_of_proj`.
     #[serde(
         rename = "PP_QFCOEF",
         alias = "PP_QFCOEFF",
         default,
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
     )]
-    pub qfcoef: Option<NumericSection>,
+    pub qfcoef: Option<Vec<f64>>,
     /// Inner-radius metadata in tag `PP_RINNER`.
+    /// Expected size: `effective_nqlc`.
     #[serde(
         rename = "PP_RINNER",
         default,
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
     )]
-    pub rinner: Option<NumericSection>,
+    pub rinner: Option<Vec<f64>>,
     /// Open-ended augmentation channels such as `PP_QIJL.i.j.l`.
     #[serde(rename = "$value", default)]
     pub channels: Vec<Tagged<PpAugmentationChannel>>,
@@ -270,16 +259,16 @@ impl Serialize for PpAugmentation {
             map.serialize_entry("@raug", raug)?;
         }
         if let Some(q) = &self.q {
-            map.serialize_entry("PP_Q", q)?;
+            map.serialize_entry("PP_Q", &NumericSectionTextValueRef(q))?;
         }
         if let Some(multipoles) = &self.multipoles {
-            map.serialize_entry("PP_MULTIPOLES", multipoles)?;
+            map.serialize_entry("PP_MULTIPOLES", &NumericSectionTextValueRef(multipoles))?;
         }
         if let Some(qfcoef) = &self.qfcoef {
-            map.serialize_entry("PP_QFCOEF", qfcoef)?;
+            map.serialize_entry("PP_QFCOEF", &NumericSectionTextValueRef(qfcoef))?;
         }
         if let Some(rinner) = &self.rinner {
-            map.serialize_entry("PP_RINNER", rinner)?;
+            map.serialize_entry("PP_RINNER", &NumericSectionTextValueRef(rinner))?;
         }
         for channel in &self.channels {
             map.serialize_entry(&channel.tag, &channel.value)?;
@@ -291,15 +280,6 @@ impl Serialize for PpAugmentation {
 /// One augmentation radial channel such as `PP_QIJL.1.2.0`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PpAugmentationChannel {
-    /// UPF numeric type in attribute `type`.
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    /// Declared element count in attribute `size`.
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    /// Display column hint in attribute `columns`.
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
     /// First projector index in attribute `first_index`.
     #[serde(rename = "@first_index")]
     pub first_index: usize,

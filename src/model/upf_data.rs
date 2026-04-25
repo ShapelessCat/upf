@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use super::{
-    NumericSection, PpFullWfc, PpGipaw, PpHeader, PpInfo, PpMesh, PpNonlocal, PpPaw,
-    PpPseudoWavefunctions, PpSemilocal, PpSpinOrb,
+    PpAugmentation, PpFullWfc, PpGipaw, PpHeader, PpInfo, PpMesh, PpNonlocal, PpPaw,
+    PpPseudoWavefunctions, PpSemilocal, PpSpinOrb, numeric_section_vec,
+    optional_numeric_section_vec,
 };
 
 /// Root UPF document corresponding to the top-level `<UPF ...> ... </UPF>` tag.
@@ -24,11 +25,23 @@ pub struct UpfData {
     #[serde(rename = "PP_MESH")]
     pub mesh: PpMesh,
     /// Nonlinear core correction values in tag `PP_NLCC`.
-    #[serde(rename = "PP_NLCC", default, skip_serializing_if = "Option::is_none")]
-    pub nlcc: Option<NumericSection>,
+    /// Expected size: `header.mesh_size`.
+    #[serde(
+        rename = "PP_NLCC",
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
+    )]
+    pub nlcc: Option<Vec<f64>>,
     /// Local potential samples in tag `PP_LOCAL`, omitted for Coulomb datasets.
-    #[serde(rename = "PP_LOCAL", default, skip_serializing_if = "NumericSection::is_empty")]
-    pub local: NumericSection,
+    /// Expected size: `header.mesh_size` whenever present.
+    #[serde(
+        rename = "PP_LOCAL",
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        with = "numeric_section_vec"
+    )]
+    pub local: Vec<f64>,
     /// Semilocal channels in tag `PP_SEMILOCAL`.
     #[serde(rename = "PP_SEMILOCAL", skip_serializing_if = "Option::is_none")]
     pub semilocal: Option<PpSemilocal>,
@@ -46,18 +59,27 @@ pub struct UpfData {
     #[serde(rename = "PP_FULL_WFC", skip_serializing_if = "Option::is_none")]
     pub full_wfc: Option<PpFullWfc>,
     /// Atomic charge density samples in tag `PP_RHOATOM`.
-    #[serde(rename = "PP_RHOATOM")]
-    pub rhoatom: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_RHOATOM", with = "numeric_section_vec")]
+    pub rhoatom: Vec<f64>,
     /// Metagga kinetic-energy density in tag `PP_TAUMOD`.
-    #[serde(rename = "PP_TAUMOD", default, skip_serializing_if = "Option::is_none")]
-    pub taumod: Option<NumericSection>,
+    /// Expected size: `header.mesh_size`.
+    #[serde(
+        rename = "PP_TAUMOD",
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
+    )]
+    pub taumod: Option<Vec<f64>>,
     /// Metagga atomic kinetic-energy density in tag `PP_TAUATOM`.
+    /// Expected size: `header.mesh_size`.
     #[serde(
         rename = "PP_TAUATOM",
         default,
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        with = "optional_numeric_section_vec"
     )]
-    pub tauatom: Option<NumericSection>,
+    pub tauatom: Option<Vec<f64>>,
     /// Spin-orbit metadata in tag `PP_SPIN_ORB`.
     #[serde(
         rename = "PP_SPIN_ORB",
@@ -74,34 +96,34 @@ pub struct UpfData {
 }
 
 impl UpfData {
-    fn validate_section_size(name: &str, section: &NumericSection) -> Result<(), crate::UpfError> {
-        if let Some(size) = section.size
-            && size != section.len()
-        {
+    fn validate_len(name: &str, actual: usize, expected: usize) -> Result<(), crate::UpfError> {
+        if actual != expected {
             return Err(crate::UpfError::Validation(format!(
-                "{name} declares size {size} but contains {} values",
-                section.len()
+                "{name} length {actual} does not match expected size {expected}"
             )));
         }
 
         Ok(())
     }
 
-    fn validate_numbered_size(
-        name: impl Into<String>,
-        declared_size: Option<usize>,
-        actual_size: usize,
+    fn validate_optional_len(
+        name: &str,
+        section: Option<&Vec<f64>>,
+        expected: usize,
     ) -> Result<(), crate::UpfError> {
-        if let Some(size) = declared_size
-            && size != actual_size
-        {
-            return Err(crate::UpfError::Validation(format!(
-                "{} declares size {size} but contains {actual_size} values",
-                name.into()
-            )));
+        if let Some(section) = section {
+            Self::validate_len(name, section.len(), expected)?;
         }
 
         Ok(())
+    }
+
+    fn effective_nqlc(augmentation: &PpAugmentation, header_l_max: usize) -> usize {
+        if augmentation.nqlc == 0 {
+            2 * header_l_max + 1
+        } else {
+            augmentation.nqlc
+        }
     }
 
     /// Check structural invariants that are not enforced by XML shape alone.
@@ -111,20 +133,6 @@ impl UpfData {
     /// GIPAW data are consistent with the presence of `PP_PAW` and `PP_GIPAW`.
     pub fn validate(&self) -> Result<(), crate::UpfError> {
         let mesh = self.header.mesh_size;
-        Self::validate_section_size("PP_R", &self.mesh.r)?;
-        Self::validate_section_size("PP_RAB", &self.mesh.rab)?;
-        Self::validate_section_size("PP_RHOATOM", &self.rhoatom)?;
-
-        if let Some(nlcc) = &self.nlcc {
-            Self::validate_section_size("PP_NLCC", nlcc)?;
-        }
-        if let Some(taumod) = &self.taumod {
-            Self::validate_section_size("PP_TAUMOD", taumod)?;
-        }
-        if let Some(tauatom) = &self.tauatom {
-            Self::validate_section_size("PP_TAUATOM", tauatom)?;
-        }
-
         if let Some(declared_mesh) = self.mesh.mesh
             && declared_mesh != mesh
         {
@@ -134,63 +142,20 @@ impl UpfData {
             )));
         }
 
-        if self.mesh.r.len() != mesh {
-            return Err(crate::UpfError::Validation(format!(
-                "mesh_size {} does not match PP_R length {}",
-                mesh,
-                self.mesh.r.len()
-            )));
+        Self::validate_len("PP_R", self.mesh.r.len(), mesh)?;
+        Self::validate_len("PP_RAB", self.mesh.rab.len(), mesh)?;
+        if !self.header.is_coulomb && self.local.is_empty() {
+            return Err(crate::UpfError::Validation(
+                "PP_HEADER marks the dataset as non-Coulomb but PP_LOCAL is missing".into(),
+            ));
         }
-        if self.mesh.rab.len() != mesh {
-            return Err(crate::UpfError::Validation(format!(
-                "mesh_size {} does not match PP_RAB length {}",
-                mesh,
-                self.mesh.rab.len()
-            )));
+        if !self.local.is_empty() {
+            Self::validate_len("PP_LOCAL", self.local.len(), mesh)?;
         }
-        if !self.header.is_coulomb {
-            if self.local.is_empty() {
-                return Err(crate::UpfError::Validation(
-                    "PP_HEADER marks the dataset as non-Coulomb but PP_LOCAL is missing".into(),
-                ));
-            }
-            Self::validate_section_size("PP_LOCAL", &self.local)?;
-        } else if !self.local.is_empty() {
-            Self::validate_section_size("PP_LOCAL", &self.local)?;
-        }
-
-        if !self.header.is_coulomb && self.local.len() != mesh {
-            return Err(crate::UpfError::Validation(format!(
-                "mesh_size {} does not match PP_LOCAL length {}",
-                mesh,
-                self.local.len()
-            )));
-        }
-        if self.rhoatom.len() != mesh {
-            return Err(crate::UpfError::Validation(format!(
-                "mesh_size {} does not match PP_RHOATOM length {}",
-                mesh,
-                self.rhoatom.len()
-            )));
-        }
-        if let Some(taumod) = &self.taumod
-            && taumod.len() != mesh
-        {
-            return Err(crate::UpfError::Validation(format!(
-                "mesh_size {} does not match PP_TAUMOD length {}",
-                mesh,
-                taumod.len()
-            )));
-        }
-        if let Some(tauatom) = &self.tauatom
-            && tauatom.len() != mesh
-        {
-            return Err(crate::UpfError::Validation(format!(
-                "mesh_size {} does not match PP_TAUATOM length {}",
-                mesh,
-                tauatom.len()
-            )));
-        }
+        Self::validate_len("PP_RHOATOM", self.rhoatom.len(), mesh)?;
+        Self::validate_optional_len("PP_NLCC", self.nlcc.as_ref(), mesh)?;
+        Self::validate_optional_len("PP_TAUMOD", self.taumod.as_ref(), mesh)?;
+        Self::validate_optional_len("PP_TAUATOM", self.tauatom.as_ref(), mesh)?;
         if self.header.core_correction && self.nlcc.is_none() {
             return Err(crate::UpfError::Validation(
                 "PP_HEADER enables core correction but PP_NLCC is missing".into(),
@@ -209,23 +174,18 @@ impl UpfData {
             )));
         }
         for beta in &self.nonlocal.betas {
-            Self::validate_numbered_size(beta.tag.as_str(), beta.value.size, beta.value.values.len())?;
+            Self::validate_len(&beta.tag.as_str(), beta.value.values.len(), mesh)?;
         }
-        if let Some(size) = self.nonlocal.dij.size
-            && size != self.nonlocal.dij.values.len()
-        {
-            return Err(crate::UpfError::Validation(format!(
-                "PP_DIJ declares size {size} but contains {} values",
-                self.nonlocal.dij.values.len()
-            )));
+        if !self.nonlocal.dij.is_empty() {
+            Self::validate_len(
+                "PP_DIJ",
+                self.nonlocal.dij.len(),
+                self.header.number_of_proj * self.header.number_of_proj,
+            )?;
         }
         if let Some(semilocal) = &self.semilocal {
             for channel in &semilocal.channels {
-                Self::validate_numbered_size(
-                    channel.tag.as_str(),
-                    channel.value.size,
-                    channel.value.values.len(),
-                )?;
+                Self::validate_len(&channel.tag.as_str(), channel.value.values.len(), mesh)?;
             }
         }
         if self.header.number_of_wfc != 0 {
@@ -247,11 +207,7 @@ impl UpfData {
         }
         if let Some(pswfc) = &self.pswfc {
             for orbital in &pswfc.orbitals {
-                Self::validate_numbered_size(
-                    orbital.tag.as_str(),
-                    orbital.value.size,
-                    orbital.value.values.len(),
-                )?;
+                Self::validate_len(&orbital.tag.as_str(), orbital.value.values.len(), mesh)?;
             }
         }
         if self.header.has_wfc && self.full_wfc.is_none() {
@@ -273,7 +229,7 @@ impl UpfData {
                 }
             }
             for entry in &full_wfc.entries {
-                Self::validate_numbered_size(entry.tag.as_str(), entry.value.size, entry.value.values.len())?;
+                Self::validate_len(&entry.tag.as_str(), entry.value.values.len(), mesh)?;
             }
         }
         if self.header.is_paw && self.paw.is_none() {
@@ -330,15 +286,13 @@ impl UpfData {
                     "PP_PAW is present but PP_OCCUPATIONS is missing".into(),
                 ));
             }
-            if let Some(section) = &paw.occupations {
-                Self::validate_section_size("PP_PAW/PP_OCCUPATIONS", section)?;
-            }
-            if let Some(section) = &paw.ae_nlcc {
-                Self::validate_section_size("PP_PAW/PP_AE_NLCC", section)?;
-            }
-            if let Some(section) = &paw.ae_vloc {
-                Self::validate_section_size("PP_PAW/PP_AE_VLOC", section)?;
-            }
+            Self::validate_optional_len(
+                "PP_PAW/PP_OCCUPATIONS",
+                paw.occupations.as_ref(),
+                self.header.number_of_proj,
+            )?;
+            Self::validate_optional_len("PP_PAW/PP_AE_NLCC", paw.ae_nlcc.as_ref(), mesh)?;
+            Self::validate_optional_len("PP_PAW/PP_AE_VLOC", paw.ae_vloc.as_ref(), mesh)?;
         }
         if self.header.has_gipaw && self.gipaw.is_none() {
             return Err(crate::UpfError::Validation(
@@ -367,24 +321,26 @@ impl UpfData {
             ));
         }
         if let Some(augmentation) = &self.nonlocal.augmentation {
-            if let Some(q) = &augmentation.q {
-                Self::validate_section_size("PP_AUGMENTATION/PP_Q", q)?;
-            }
-            if let Some(multipoles) = &augmentation.multipoles {
-                Self::validate_section_size("PP_AUGMENTATION/PP_MULTIPOLES", multipoles)?;
-            }
-            if let Some(qfcoef) = &augmentation.qfcoef {
-                Self::validate_section_size("PP_AUGMENTATION/PP_QFCOEF", qfcoef)?;
-            }
-            if let Some(rinner) = &augmentation.rinner {
-                Self::validate_section_size("PP_AUGMENTATION/PP_RINNER", rinner)?;
-            }
+            let proj = self.header.number_of_proj;
+            let effective_nqlc = Self::effective_nqlc(augmentation, self.header.l_max);
+            Self::validate_optional_len("PP_AUGMENTATION/PP_Q", augmentation.q.as_ref(), proj * proj)?;
+            Self::validate_optional_len(
+                "PP_AUGMENTATION/PP_MULTIPOLES",
+                augmentation.multipoles.as_ref(),
+                proj * proj * (2 * self.header.l_max + 1),
+            )?;
+            Self::validate_optional_len(
+                "PP_AUGMENTATION/PP_RINNER",
+                augmentation.rinner.as_ref(),
+                effective_nqlc,
+            )?;
+            Self::validate_optional_len(
+                "PP_AUGMENTATION/PP_QFCOEF",
+                augmentation.qfcoef.as_ref(),
+                augmentation.nqf * effective_nqlc * proj * proj,
+            )?;
             for channel in &augmentation.channels {
-                Self::validate_numbered_size(
-                    &channel.tag,
-                    channel.value.size,
-                    channel.value.values.len(),
-                )?;
+                Self::validate_len(&channel.tag, channel.value.values.len(), mesh)?;
             }
             // Validate q_with_l consistency with channel naming and angular_momentum.
             for channel in &augmentation.channels {
@@ -429,16 +385,7 @@ impl UpfData {
                 )));
             }
             for orbital in &core_orbitals.orbitals {
-                if let Some(size) = orbital.value.size
-                    && size != orbital.value.values.len()
-                {
-                    return Err(crate::UpfError::Validation(format!(
-                        "{} declares size {} but contains {} values",
-                        orbital.tag,
-                        size,
-                        orbital.value.values.len()
-                    )));
-                }
+                Self::validate_len(&orbital.tag.as_str(), orbital.value.values.len(), mesh)?;
             }
         }
         if let Some(gipaw) = &self.gipaw {
@@ -451,19 +398,21 @@ impl UpfData {
                     )));
                 }
                 for orbital in &orbitals.orbitals {
-                    Self::validate_section_size(
+                    Self::validate_len(
                         "PP_GIPAW_ORBITAL/PP_GIPAW_WFS_AE",
-                        &orbital.value.ae,
+                        orbital.value.ae.len(),
+                        mesh,
                     )?;
-                    Self::validate_section_size(
+                    Self::validate_len(
                         "PP_GIPAW_ORBITAL/PP_GIPAW_WFS_PS",
-                        &orbital.value.ps,
+                        orbital.value.ps.len(),
+                        mesh,
                     )?;
                 }
             }
             if let Some(vlocal) = &gipaw.vlocal {
-                Self::validate_section_size("PP_GIPAW_VLOCAL/PP_GIPAW_VLOCAL_AE", &vlocal.ae)?;
-                Self::validate_section_size("PP_GIPAW_VLOCAL/PP_GIPAW_VLOCAL_PS", &vlocal.ps)?;
+                Self::validate_len("PP_GIPAW_VLOCAL/PP_GIPAW_VLOCAL_AE", vlocal.ae.len(), mesh)?;
+                Self::validate_len("PP_GIPAW_VLOCAL/PP_GIPAW_VLOCAL_PS", vlocal.ps.len(), mesh)?;
             }
         }
         Ok(())

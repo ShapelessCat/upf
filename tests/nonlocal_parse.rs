@@ -21,7 +21,7 @@ fn parses_nonlocal_and_augmentation_sections() {
     let doc = from_file(example("H.pbe-rrkjus_psl.1.0.0.UPF")).unwrap();
 
     assert_eq!(doc.nonlocal.betas.len(), 2);
-    assert_eq!(doc.nonlocal.dij.values.len(), 4);
+    assert_eq!(doc.nonlocal.dij.len(), 4);
     assert!(doc.nonlocal.augmentation.is_some());
     assert_eq!(doc.pswfc.as_ref().unwrap().orbitals.len(), 1);
 }

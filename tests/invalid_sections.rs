@@ -296,7 +296,7 @@ fn spin_orbit_flag_requires_spin_orb_section() {
 }
 
 #[test]
-fn semilocal_channel_size_must_match_payload_length() {
+fn semilocal_declared_size_attribute_is_ignored() {
     let xml = r#"
     <UPF version="2.0.1">
       <PP_HEADER generated="unit" author="tester" date="2026-04-03" comment="invalid"
@@ -320,13 +320,14 @@ fn semilocal_channel_size_must_match_payload_length() {
     </UPF>
     "#;
 
-    let err = from_str(xml).unwrap_err();
-    assert!(err.to_string().contains("PP_VNL.1"));
-    assert!(err.to_string().contains("declares size"));
+    let doc = from_str(xml).unwrap();
+    let semilocal = doc.semilocal.unwrap();
+
+    assert_eq!(semilocal.channels[0].value.values, vec![0.1]);
 }
 
 #[test]
-fn projector_size_must_match_payload_length() {
+fn projector_declared_size_attribute_is_ignored() {
     let xml = r#"
     <UPF version="2.0.1">
       <PP_HEADER generated="unit" author="tester" date="2026-04-03" comment="invalid"
@@ -351,9 +352,9 @@ fn projector_size_must_match_payload_length() {
     </UPF>
     "#;
 
-    let err = from_str(xml).unwrap_err();
-    assert!(err.to_string().contains("PP_BETA.1"));
-    assert!(err.to_string().contains("declares size"));
+    let doc = from_str(xml).unwrap();
+
+    assert_eq!(doc.nonlocal.betas[0].value.values, vec![0.1]);
 }
 
 #[test]
@@ -655,7 +656,10 @@ fn paw_mesh_sized_sections_must_match_mesh_size() {
       </PP_MESH>
       <PP_LOCAL>1.0 2.0</PP_LOCAL>
       <PP_NONLOCAL>
-        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1 0.2</PP_BETA.1>
+        <PP_AUGMENTATION q_with_l="T" nqf="0" nqlc="1">
+          <PP_Q>0.0</PP_Q>
+        </PP_AUGMENTATION>
       </PP_NONLOCAL>
       <PP_PAW paw_data_format="2">
         <PP_OCCUPATIONS>2.0</PP_OCCUPATIONS>
@@ -687,8 +691,8 @@ fn augmentation_vector_lengths_must_match_derived_qe_sizes() {
       </PP_MESH>
       <PP_LOCAL>1.0 2.0</PP_LOCAL>
       <PP_NONLOCAL>
-        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
-        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2</PP_BETA.2>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1 0.2</PP_BETA.1>
+        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2 0.3</PP_BETA.2>
         <PP_AUGMENTATION q_with_l="T" nqf="2" nqlc="0">
           <PP_Q>0.0 0.1 0.2</PP_Q>
         </PP_AUGMENTATION>
@@ -722,8 +726,8 @@ fn augmentation_multipoles_rinner_and_qfcoef_must_match_derived_sizes() {
       </PP_MESH>
       <PP_LOCAL>1.0 2.0</PP_LOCAL>
       <PP_NONLOCAL>
-        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
-        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2</PP_BETA.2>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1 0.2</PP_BETA.1>
+        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2 0.3</PP_BETA.2>
         <PP_AUGMENTATION q_with_l="T" nqf="2" nqlc="0">
           <PP_Q>0.0 0.1 0.2 0.3</PP_Q>
           <PP_MULTIPOLES>0.0 0.1 0.2 0.3 0.4</PP_MULTIPOLES>
@@ -758,8 +762,8 @@ fn augmentation_rinner_length_must_match_effective_nqlc() {
       </PP_MESH>
       <PP_LOCAL>1.0 2.0</PP_LOCAL>
       <PP_NONLOCAL>
-        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
-        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2</PP_BETA.2>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1 0.2</PP_BETA.1>
+        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2 0.3</PP_BETA.2>
         <PP_AUGMENTATION q_with_l="T" nqf="2" nqlc="0">
           <PP_Q>0.0 0.1 0.2 0.3</PP_Q>
           <PP_RINNER>0.5 0.6</PP_RINNER>
@@ -794,8 +798,8 @@ fn augmentation_qfcoef_length_must_match_derived_qe_shape() {
       </PP_MESH>
       <PP_LOCAL>1.0 2.0</PP_LOCAL>
       <PP_NONLOCAL>
-        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1</PP_BETA.1>
-        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2</PP_BETA.2>
+        <PP_BETA.1 index="1" angular_momentum="0" cutoff_radius="1.0">0.1 0.2</PP_BETA.1>
+        <PP_BETA.2 index="2" angular_momentum="1" cutoff_radius="1.0">0.2 0.3</PP_BETA.2>
         <PP_AUGMENTATION q_with_l="T" nqf="2" nqlc="1">
           <PP_Q>0.0 0.1 0.2 0.3</PP_Q>
           <PP_RINNER>0.5</PP_RINNER>
@@ -840,7 +844,7 @@ fn gipaw_mesh_sized_sections_must_match_mesh_size() {
       </PP_SPIN_ORB>
       <PP_GIPAW gipaw_data_format="2">
         <PP_GIPAW_CORE_ORBITALS number_of_core_orbitals="1">
-          <PP_GIPAW_CORE_ORBITAL.1 index="1" label="1S" n="1.0" l="0.0">0.8</PP_GIPAW_CORE_ORBITAL.1>
+          <PP_GIPAW_CORE_ORBITAL.1 index="1" label="1S" n="1.0" l="0.0">0.8 0.9</PP_GIPAW_CORE_ORBITAL.1>
         </PP_GIPAW_CORE_ORBITALS>
         <PP_GIPAW_ORBITALS number_of_valence_orbitals="1">
           <PP_GIPAW_ORBITAL.1 index="1" label="2P" l="1" cutoff_radius="1.2" ultrasoft_cutoff_radius="1.4">

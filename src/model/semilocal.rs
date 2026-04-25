@@ -1,7 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::{Numbered, UpfDataType, numeric_text::deserialize_f64_values};
+use super::{Numbered, numeric_text::deserialize_f64_values};
 
 /// `PP_SEMILOCAL` section containing semilocal potential channels.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -27,15 +27,6 @@ impl Serialize for PpSemilocal {
 /// One semilocal channel body.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PpSemilocalValues {
-    /// UPF numeric type in attribute `type`.
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    /// Declared element count in attribute `size`.
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    /// Display column hint in attribute `columns`.
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
     /// Angular momentum in attribute `l`.
     #[serde(rename = "@l", alias = "@L")]
     pub l: usize,

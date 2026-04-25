@@ -47,7 +47,7 @@
 //!
 //! let upf_data = from_str(xml).unwrap();
 //! assert_eq!(upf_data.header.element, "He");
-//! assert_eq!(upf_data.mesh.r.values.len(), upf_data.header.mesh_size);
+//! assert_eq!(upf_data.mesh.r.len(), upf_data.header.mesh_size);
 //! ```
 
 mod de;

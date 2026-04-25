@@ -1,7 +1,7 @@
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::{Numbered, NumericSection, UpfDataType, numeric_text::deserialize_f64_values};
+use super::{Numbered, numeric_section_vec, numeric_text::deserialize_f64_values};
 
 /// `PP_GIPAW` section for datasets that include GIPAW reconstruction data.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -88,15 +88,6 @@ impl Serialize for GipawValenceOrbitals {
 /// One `PP_GIPAW_CORE_ORBITAL.n` entry inside a GIPAW block.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GipawOrbital {
-    /// UPF numeric type in attribute `type`.
-    #[serde(rename = "@type", default, skip_serializing_if = "Option::is_none")]
-    pub data_type: Option<UpfDataType>,
-    /// Declared element count in attribute `size`.
-    #[serde(rename = "@size", default, skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
-    /// Display column hint in attribute `columns`.
-    #[serde(rename = "@columns", default, skip_serializing_if = "Option::is_none")]
-    pub columns: Option<usize>,
     /// Orbital index in attribute `index`.
     #[serde(rename = "@index")]
     pub index: usize,
@@ -137,20 +128,24 @@ pub struct GipawValenceOrbital {
     )]
     pub ultrasoft_cutoff_radius: Option<f64>,
     /// All-electron GIPAW wavefunction.
-    #[serde(rename = "PP_GIPAW_WFS_AE")]
-    pub ae: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_GIPAW_WFS_AE", with = "numeric_section_vec")]
+    pub ae: Vec<f64>,
     /// Pseudo GIPAW wavefunction.
-    #[serde(rename = "PP_GIPAW_WFS_PS")]
-    pub ps: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_GIPAW_WFS_PS", with = "numeric_section_vec")]
+    pub ps: Vec<f64>,
 }
 
 /// `PP_GIPAW_VLOCAL` container.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GipawVlocal {
     /// All-electron local potential.
-    #[serde(rename = "PP_GIPAW_VLOCAL_AE")]
-    pub ae: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_GIPAW_VLOCAL_AE", with = "numeric_section_vec")]
+    pub ae: Vec<f64>,
     /// Pseudo local potential.
-    #[serde(rename = "PP_GIPAW_VLOCAL_PS")]
-    pub ps: NumericSection,
+    /// Expected size: `header.mesh_size`.
+    #[serde(rename = "PP_GIPAW_VLOCAL_PS", with = "numeric_section_vec")]
+    pub ps: Vec<f64>,
 }
