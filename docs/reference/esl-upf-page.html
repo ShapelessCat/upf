@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPF - ESL Page Snapshot</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --fg: #1e2430;
+      --muted: #5d6878;
+      --panel: #ffffff;
+      --border: #d8dee8;
+      --accent: #0a5fb4;
+      --code: #eef3f8;
+    }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.55;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 28px 32px;
+    }
+    h1, h2, h3, h4 {
+      line-height: 1.2;
+      margin-top: 1.4em;
+      margin-bottom: 0.45em;
+    }
+    h1 { margin-top: 0; }
+    p, ul { margin: 0.7em 0; }
+    code, pre {
+      font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.95em;
+    }
+    pre {
+      background: var(--code);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      overflow-x: auto;
+    }
+    .meta {
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <h1>UPF</h1>
+      <p class="meta">
+        Local transcription based on
+        <a href="https://esl.cecam.org/en/data/upf/index.html">https://esl.cecam.org/en/data/upf/index.html</a>.
+        This file captures the substantive page content in a local standalone HTML form.
+      </p>
+
+      <h2>Introduction</h2>
+      <p>Current UPF specification version: <strong>2.0.1</strong>.</p>
+      <p>Readers listed on the page: <a href="https://www.quantum-espresso.org/">Quantum Espresso</a>, <a href="https://www.abinit.org/">abinit</a>, and <a href="https://wiki.fysik.dtu.dk/gpaw/">gpaw</a> (the page notes the list is incomplete).</p>
+      <p>Generators listed on the page: <a href="https://www.quantum-espresso.org/">Quantum Espresso</a> (also marked as incomplete).</p>
+      <p>The page points to the official UPF documentation by P. Giannozzi on the Quantum Espresso site and describes UPF 2.0.1 as the latest stable version since 2010. It also warns that ultrasoft pseudopotentials written as version 2.0.0 may be affected by an older bug fixed in later versions.</p>
+
+      <h3>Content</h3>
+      <p>The page describes UPF as a container for most element-specific data used by Quantum Espresso, including norm-conserving pseudopotentials, ultrasoft pseudopotentials, PAW datasets, bare <code>1/r</code> potentials, and core-wavefunction information used to reconstruct all-electron density in magnetic-resonance or X-ray absorption workflows.</p>
+
+      <h3>Units</h3>
+      <p>The page states that UPF follows Quantum Espresso atomic Rydberg units: <code>e^2 = 2</code>, <code>m = 1/2</code>, <code>hbar = 1</code>. Lengths are in Bohr radii, energies are in Ry, and potentials are multiplied by <code>e</code> so they carry energy units.</p>
+
+      <h3>Format</h3>
+      <p>The page explains that UPF was originally designed around the IOTK FORTRAN90 library. The format is XML-like, but not fully XML-compliant. One example given is numbered element names such as <code>&lt;PP_BETA.1&gt;</code> and <code>&lt;PP_BETA.2&gt;</code>.</p>
+      <p>The syntax summary given on the page includes:</p>
+      <ul>
+        <li>Elements open with tags such as <code>&lt;FOO&gt;</code> and close with <code>&lt;/FOO&gt;</code>.</li>
+        <li>Empty elements may be written as <code>&lt;FOO/&gt;</code>.</li>
+        <li>Element names are case-sensitive, and trailing characters after <code>&gt;</code> are to be ignored.</li>
+        <li>Elements may carry attributes. For some attributes, notably <code>type</code> and <code>size</code>, the page says the enclosed data should be consistent with the attribute values.</li>
+        <li>The root element must be <code>UPF</code> and must carry a <code>version</code> attribute.</li>
+      </ul>
+      <pre>&lt;UPF version="2.0.1"&gt;
+  ...
+&lt;/UPF&gt;</pre>
+      <p>The page also defines UPF “data elements” with optional attributes such as <code>type</code>, <code>size</code>, <code>columns</code>, <code>len</code>, and <code>fmt</code>. It notes that IOTK enforces the expected intrinsic type when <code>type</code> is omitted and ignores formatting-oriented attributes such as <code>columns</code> and <code>fmt</code> during reading.</p>
+      <p>Finally, the page says that although UPF is not XML, it can still be validated against a schema. It credits initial XSD work to L. Talirz and links to the ongoing effort on GitHub.</p>
+
+      <h2>Specification of the elements</h2>
+      <p>The page says the list that follows reflects the elements and subelements that can occur in UPF as written by Quantum Espresso.</p>
+
+      <h3>PP_INFO</h3>
+      <p><code>PP_INFO</code> is described as the human-readable, non-parse-oriented part of a UPF file. It is optional. The page says it usually contains:</p>
+      <ul>
+        <li>Generator name and version</li>
+        <li>Author</li>
+        <li>Generation date</li>
+        <li>Pseudopotential type, with allowed values <code>NC</code>, <code>US</code>, and <code>PAW</code></li>
+        <li>Element label, limited to two characters</li>
+        <li>Exchange-correlation functional</li>
+        <li>Suggested plane-wave cutoffs for wavefunctions and density</li>
+        <li>Relativistic treatment: non-relativistic, scalar-relativistic, or fully relativistic</li>
+        <li>Information about the effective local ionic potential used before unscreening valence electrons</li>
+        <li>Whether spin-orbit or GIPAW reconstruction data is present</li>
+        <li>Valence and generation configurations, including cases where they differ</li>
+        <li>Further author comments</li>
+        <li>An optional nested <code>&lt;PP_INPUTFILE&gt;</code> block containing the generation input file</li>
+      </ul>
+      <p>The page gives additional discussion of local-potential choices, including the meaning of <code>lloc = -1</code> and <code>lloc = -2</code>, and notes that for PAW this local potential corresponds to the Kresse-Joubert zero-potential construction.</p>
+
+      <h3>PP_HEADER</h3>
+      <p>The page describes <code>PP_HEADER</code> as a special element: structurally empty, but carrying a large set of attributes that are essential for parsing the rest of the file. It says the header must be processed before the remaining parseable sections because its values control how later sections are read.</p>
+      <p>Specific attributes called out on the page include:</p>
+      <ul>
+        <li><code>is_coulomb</code>: indicates a bare <code>1/r</code> potential instead of a pseudopotential</li>
+        <li><code>has_wfc</code>: says whether all-electron partial waves are written</li>
+        <li><code>paw_as_gipaw</code>: indicates whether PAW data is reused for GIPAW reconstruction</li>
+        <li><code>lmax</code> and <code>lmax_rho</code>: maximum angular-momentum channels in the potential and density, respectively</li>
+      </ul>
+
+      <h4>Comparison with PAW-XML</h4>
+      <p>The page includes a comparison between UPF and PAW-XML. It notes that UPF stores <code>element</code> and <code>z_valence</code> as header attributes, while the atomic number can often be inferred from <code>zmesh</code> in <code>PP_MESH</code>. It also notes that UPF uses QE functional names rather than LibXC names, that <code>pseudo_type</code> and the boolean flags introduce some redundancy, and that <code>core_energy</code> in <code>PP_PAW</code> has no strict PAW-XML equivalent.</p>
+
+      <h4>Parsing implications</h4>
+      <p>The page stresses that header attributes determine the presence or reading behavior of sibling elements. It gives Quantum Espresso examples:</p>
+      <ul>
+        <li>The default radial-grid size comes from the header if <code>PP_MESH</code> omits it.</li>
+        <li><code>number_of_proj</code> controls how many <code>PP_BETA</code> entries are read.</li>
+        <li><code>number_of_wfc</code> similarly controls <code>PP_CHI</code> entries.</li>
+        <li><code>is_ultrasoft</code> and <code>is_paw</code> determine whether <code>PP_AUGMENTATION</code> is read.</li>
+        <li><code>has_wfc</code> controls reading of <code>PP_FULL_WFC</code>.</li>
+        <li><code>has_so</code> affects relativistic sections such as <code>PP_SPIN_ORB</code> and <code>PP_AEWFC_REL</code>.</li>
+        <li><code>is_paw</code> controls the PAW subtree.</li>
+        <li><code>has_gipaw</code> and <code>paw_as_gipaw</code> control GIPAW reconstruction sections and assignments.</li>
+      </ul>
+      <p>The page also lists a set of strictly needed, non-defaulted attributes, including <code>element</code>, <code>pseudo_type</code>, <code>relativistic</code>, <code>is_ultrasoft</code>, <code>is_paw</code>, <code>core_correction</code>, <code>functional</code>, <code>z_valance</code>, <code>mesh_size</code>, <code>number_of_wfc</code>, and <code>number_of_proj</code>.</p>
+
+      <h3>PP_MESH</h3>
+      <p>The page says UPF assumes a single radial grid shared by all radial functions in the file. That grid definition is stored in <code>PP_MESH</code>, which must follow <code>PP_HEADER</code>.</p>
+      <pre>&lt;PP_MESH dx="dx" mesh="m" xmin="xmin" rmax="rmax" zmesh="Z"&gt;
+  &lt;PP_R type="real" size="m" columns="c"&gt;
+     r(1) r(2) ... r(m)
+  &lt;/PP_R&gt;
+  &lt;PP_RAB type="real" size="m" columns="c"&gt;
+     rab(1) rab(2) ... rab(m)
+  &lt;/PP_RAB&gt;
+&lt;/PP_MESH&gt;</pre>
+      <p>The page explains the attributes <code>dx</code>, <code>mesh</code>, <code>xmin</code>, <code>rmax</code>, and <code>zmesh</code>, including the interpretation of <code>zmesh</code> as the atomic number used to construct the radial logarithmic grid. It gives the analytic form <code>r_i = (1 / Z) exp(xmin) exp((i - 1) dx)</code> and the derivative <code>dr_i/di = r_i dx</code>.</p>
+      <p>It then stresses that QE itself uses the numerical subelements <code>PP_R</code> and <code>PP_RAB</code>, not the analytic reconstruction parameters, so other analytic grid constructions can also be represented if the numeric arrays are consistent. The page notes an exception for certain QE codes such as <code>atomic</code> and parts of GIPAW that reuse the analytic form.</p>
+      <p>Finally, it says that <code>PP_R</code> and <code>PP_RAB</code> are data elements and that their <code>size</code> attributes, when present, must match the mesh size.</p>
+
+      <h3>PP_NLCC</h3>
+      <p>The page says that when <code>PP_HEADER</code> has <code>core_correction="true"</code>, the file must contain <code>PP_NLCC</code>. This section stores the radial core-charge density used for non-linear core correction.</p>
+      <pre>&lt;PP_NLCC type="real" size="m" columns="c"&gt;
+  rho_core(1) rho_core(2) ... rho_core(m)
+&lt;/PP_NLCC&gt;</pre>
+      <p>It states that the stored radial density is normalized so that integrating <code>4 * pi * rho_core(r) dr</code> yields the total core charge, without additional factors. It also notes that the stored density need not equal the exact all-electron core density; a pseudized core charge can also be used.</p>
+      <p>The page includes a theory note: because exchange-correlation potentials are not linear in the density, a simple unscreening of the valence part introduces an error. Non-linear core correction fixes this by evaluating exchange-correlation on the combined valence-plus-core density during runtime. The page also notes that in practice a smooth approximate core density may suffice in the region where valence and core densities overlap.</p>
+
+      <p class="meta">Source page footer date shown on the page: May 12, 2020.</p>
+    </article>
+  </main>
+</body>
+</html>
