@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use crate::error::UpfError;
 use serde::{Deserialize, Deserializer, Serializer};
 
@@ -15,17 +17,17 @@ pub fn parse_f64_vec(input: &str) -> Result<Vec<f64>, UpfError> {
 
 /// Format numeric values the same compact way used by this crate's serializer.
 pub fn format_f64_slice(values: &[f64]) -> String {
-    values
-        .iter()
-        .map(|value| {
-            let mut text = value.to_string();
-            if text.ends_with(".0") {
-                text.truncate(text.len() - 2);
-            }
-            text
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
+    let mut out = String::new();
+    for (i, value) in values.iter().enumerate() {
+        if i > 0 {
+            out.push(' ');
+        }
+        let _ = write!(out, "{value}");
+        if out.ends_with(".0") {
+            out.truncate(out.len() - 2);
+        }
+    }
+    out
 }
 
 /// Parse a UPF logical flag such as `T` or `F`.
@@ -104,5 +106,10 @@ mod tests {
         assert_eq!(format_bool_flag(true), "T");
         assert_eq!(format_bool_flag(false), "F");
         assert_eq!(format_f64_slice(&[1.0, 2.5, 3.0]), "1 2.5 3");
+    }
+
+    #[test]
+    fn formats_empty_slice_as_empty_string() {
+        assert_eq!(format_f64_slice(&[]), "");
     }
 }

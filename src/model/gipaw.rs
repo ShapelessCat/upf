@@ -51,7 +51,7 @@ impl Serialize for GipawCoreOrbitals {
         let mut map = serializer.serialize_map(Some(1 + self.orbitals.len()))?;
         map.serialize_entry("@number_of_core_orbitals", &self.number_of_core_orbitals)?;
         for orbital in &self.orbitals {
-            map.serialize_entry(&orbital.tag.as_str(), &orbital.value)?;
+            map.serialize_entry(&orbital.tag.to_string(), &orbital.value)?;
         }
         map.end()
     }
@@ -79,7 +79,7 @@ impl Serialize for GipawValenceOrbitals {
             &self.number_of_valence_orbitals,
         )?;
         for orbital in &self.orbitals {
-            map.serialize_entry(&orbital.tag.as_str(), &orbital.value)?;
+            map.serialize_entry(&orbital.tag.to_string(), &orbital.value)?;
         }
         map.end()
     }

@@ -21,7 +21,7 @@ pub struct PpNonlocal {
         skip_serializing_if = "Vec::is_empty",
         with = "numeric_section_vec"
     )]
-    pub dij: PpDij,
+    pub dij: Vec<f64>,
     /// Augmentation block in tag `PP_AUGMENTATION`.
     #[serde(
         rename = "PP_AUGMENTATION",
@@ -46,7 +46,7 @@ impl Serialize for PpNonlocal {
 
         let mut map = serializer.serialize_map(Some(field_count))?;
         for beta in &self.betas {
-            map.serialize_entry(&beta.tag.as_str(), &beta.value)?;
+            map.serialize_entry(&beta.tag.to_string(), &beta.value)?;
         }
         if !self.dij.is_empty() {
             map.serialize_entry("PP_DIJ", &NumericSectionTextValueRef(&self.dij))?;
@@ -63,9 +63,6 @@ impl PpNonlocal {
         self.betas.is_empty() && self.dij.is_empty() && self.augmentation.is_none()
     }
 }
-
-/// `PP_DIJ` matrix data stored as a flat numeric list.
-pub type PpDij = Vec<f64>;
 
 /// A numbered `PP_BETA.n` projector entry inside `PP_NONLOCAL`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

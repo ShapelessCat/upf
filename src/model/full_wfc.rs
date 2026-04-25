@@ -29,7 +29,7 @@ impl Serialize for PpFullWfc {
             map.serialize_entry("@number_of_wfc", &number_of_wfc)?;
         }
         for entry in &self.entries {
-            map.serialize_entry(&entry.tag.as_str(), &entry.value)?;
+            map.serialize_entry(&entry.tag.to_string(), &entry.value)?;
         }
         map.end()
     }

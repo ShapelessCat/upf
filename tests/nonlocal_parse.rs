@@ -58,9 +58,9 @@ fn parses_numbered_semilocal_channels() {
     let semilocal = doc.semilocal.as_ref().unwrap();
 
     assert_eq!(semilocal.channels.len(), 2);
-    assert_eq!(semilocal.channels[0].tag.as_str(), "PP_VNL.1");
+    assert_eq!(semilocal.channels[0].tag.to_string(), "PP_VNL.1");
     assert_eq!(semilocal.channels[0].value.l, 0);
-    assert_eq!(semilocal.channels[1].tag.as_str(), "PP_VNL.2");
+    assert_eq!(semilocal.channels[1].tag.to_string(), "PP_VNL.2");
     assert_eq!(semilocal.channels[1].value.values, vec![0.4, 0.5, 0.6]);
 }
 

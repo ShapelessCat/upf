@@ -20,10 +20,10 @@ impl Serialize for PpSpinOrb {
     {
         let mut map = serializer.serialize_map(Some(self.relwfcs.len() + self.relbetas.len()))?;
         for relwfc in &self.relwfcs {
-            map.serialize_entry(&relwfc.tag.as_str(), &relwfc.value)?;
+            map.serialize_entry(&relwfc.tag.to_string(), &relwfc.value)?;
         }
         for relbeta in &self.relbetas {
-            map.serialize_entry(&relbeta.tag.as_str(), &relbeta.value)?;
+            map.serialize_entry(&relbeta.tag.to_string(), &relbeta.value)?;
         }
         map.end()
     }

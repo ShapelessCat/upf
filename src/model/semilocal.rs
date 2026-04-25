@@ -18,7 +18,7 @@ impl Serialize for PpSemilocal {
     {
         let mut map = serializer.serialize_map(Some(self.channels.len()))?;
         for channel in &self.channels {
-            map.serialize_entry(&channel.tag.as_str(), &channel.value)?;
+            map.serialize_entry(&channel.tag.to_string(), &channel.value)?;
         }
         map.end()
     }

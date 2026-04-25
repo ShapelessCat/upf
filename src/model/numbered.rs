@@ -45,11 +45,6 @@ impl NumberedTag {
         }
     }
 
-    /// Return the full XML tag name.
-    pub fn as_str(&self) -> String {
-        format!("{}{}", self.prefix, self.index)
-    }
-
     /// Return whether the tag belongs to the requested family prefix.
     pub fn has_prefix(&self, prefix: &str) -> bool {
         self.prefix == prefix
@@ -73,7 +68,7 @@ impl PartialOrd for NumberedTag {
 
 impl fmt::Display for NumberedTag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.as_str())
+        write!(f, "{}{}", self.prefix, self.index)
     }
 }
 
@@ -82,7 +77,7 @@ impl Serialize for NumberedTag {
     where
         S: Serializer,
     {
-        serializer.serialize_str(&self.as_str())
+        serializer.serialize_str(&self.to_string())
     }
 }
 
@@ -114,7 +109,7 @@ where
         S: Serializer,
     {
         let mut map = serializer.serialize_map(Some(1))?;
-        map.serialize_entry(&self.tag.as_str(), &self.value)?;
+        map.serialize_entry(&self.tag.to_string(), &self.value)?;
         map.end()
     }
 }
@@ -223,7 +218,7 @@ mod tests {
         let tag = NumberedTag::parse("PP_BETA.4").unwrap();
         assert_eq!(tag.prefix, "PP_BETA.");
         assert_eq!(tag.index, 4);
-        assert_eq!(tag.as_str(), "PP_BETA.4");
+        assert_eq!(tag.to_string(), "PP_BETA.4");
     }
 
     #[test]
@@ -253,7 +248,7 @@ mod tests {
         let parsed: Container = quick_xml::de::from_str(xml).unwrap();
 
         assert_eq!(parsed.entries.len(), 1);
-        assert_eq!(parsed.entries[0].tag.as_str(), "PP_BETA.4");
+        assert_eq!(parsed.entries[0].tag.to_string(), "PP_BETA.4");
         assert_eq!(parsed.entries[0].value.index, 4);
     }
 }

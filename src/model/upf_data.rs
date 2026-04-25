@@ -174,7 +174,7 @@ impl UpfData {
             )));
         }
         for beta in &self.nonlocal.betas {
-            Self::validate_len(&beta.tag.as_str(), beta.value.values.len(), mesh)?;
+            Self::validate_len(&beta.tag.to_string(), beta.value.values.len(), mesh)?;
         }
         if !self.nonlocal.dij.is_empty() {
             Self::validate_len(
@@ -185,7 +185,7 @@ impl UpfData {
         }
         if let Some(semilocal) = &self.semilocal {
             for channel in &semilocal.channels {
-                Self::validate_len(&channel.tag.as_str(), channel.value.values.len(), mesh)?;
+                Self::validate_len(&channel.tag.to_string(), channel.value.values.len(), mesh)?;
             }
         }
         if self.header.number_of_wfc != 0 {
@@ -207,7 +207,7 @@ impl UpfData {
         }
         if let Some(pswfc) = &self.pswfc {
             for orbital in &pswfc.orbitals {
-                Self::validate_len(&orbital.tag.as_str(), orbital.value.values.len(), mesh)?;
+                Self::validate_len(&orbital.tag.to_string(), orbital.value.values.len(), mesh)?;
             }
         }
         if self.header.has_wfc && self.full_wfc.is_none() {
@@ -229,7 +229,7 @@ impl UpfData {
                 }
             }
             for entry in &full_wfc.entries {
-                Self::validate_len(&entry.tag.as_str(), entry.value.values.len(), mesh)?;
+                Self::validate_len(&entry.tag.to_string(), entry.value.values.len(), mesh)?;
             }
         }
         if self.header.is_paw && self.paw.is_none() {
@@ -385,7 +385,7 @@ impl UpfData {
                 )));
             }
             for orbital in &core_orbitals.orbitals {
-                Self::validate_len(&orbital.tag.as_str(), orbital.value.values.len(), mesh)?;
+                Self::validate_len(&orbital.tag.to_string(), orbital.value.values.len(), mesh)?;
             }
         }
         if let Some(gipaw) = &self.gipaw {

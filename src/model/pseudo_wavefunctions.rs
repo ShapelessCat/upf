@@ -18,7 +18,7 @@ impl Serialize for PpPseudoWavefunctions {
     {
         let mut map = serializer.serialize_map(Some(self.orbitals.len()))?;
         for orbital in &self.orbitals {
-            map.serialize_entry(&orbital.tag.as_str(), &orbital.value)?;
+            map.serialize_entry(&orbital.tag.to_string(), &orbital.value)?;
         }
         map.end()
     }
