@@ -6,9 +6,12 @@
 //! required by the UPF structure used in this repository:
 //!
 //! - `PP_HEADER/@mesh_size` must match the lengths of `PP_R`, `PP_RAB`,
-//!   `PP_LOCAL`, and `PP_RHOATOM`
+//!   `PP_LOCAL`, `PP_RHOATOM`, and any enabled metagga sections
 //! - `PP_HEADER/@is_paw="T"` requires a `PP_PAW` section
 //! - `PP_HEADER/@has_gipaw="T"` requires a `PP_GIPAW` section
+//! - `PP_HEADER/@has_so="T"` requires a `PP_SPIN_ORB` section
+//! - `PP_HEADER/@has_wfc="T"` requires a `PP_FULL_WFC` section
+//! - `PP_HEADER/@with_metagga_info="T"` requires `PP_TAUMOD` and `PP_TAUATOM`
 //!
 //! The public API intentionally stays small:
 //!
@@ -27,6 +30,7 @@
 //!              element="He" pseudo_type="NC" relativistic="scalar"
 //!              is_ultrasoft="F" is_paw="F" is_coulomb="F"
 //!              has_so="F" has_wfc="F" has_gipaw="F" core_correction="F"
+//!              functional="PBE"
 //!              z_valence="2.0" total_psenergy="-1.25"
 //!              wfc_cutoff="20.0" rho_cutoff="80.0"
 //!              l_max="0" l_max_rho="0" l_local="0"

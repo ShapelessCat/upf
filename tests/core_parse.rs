@@ -1,4 +1,7 @@
-use upf::from_str;
+use upf::{
+    from_str,
+    model::{AtomicRelativisticFormalism, PseudopotentialType},
+};
 
 const MINIMAL_UPF: &str = r#"
 <UPF version="2.0.1">
@@ -6,17 +9,15 @@ const MINIMAL_UPF: &str = r#"
              element="He" pseudo_type="NC" relativistic="scalar"
              is_ultrasoft="F" is_paw="F" is_coulomb="F"
              has_so="F" has_wfc="F" has_gipaw="F" core_correction="F"
-             z_valence="2.0" total_psenergy="-1.25"
-             wfc_cutoff="20.0" rho_cutoff="80.0"
-             l_max="0" l_max_rho="0" l_local="0"
-             mesh_size="3" number_of_wfc="0" number_of_proj="0" />
-  <PP_MESH dx="0.1" mesh="3" xmin="0.0" rmax="0.2" zmesh="1.0">
-    <PP_R>0.0 0.1 0.2</PP_R>
-    <PP_RAB>0.1 0.1 0.1</PP_RAB>
+             functional="PBE" z_valence="2.0"
+             l_max="0" mesh_size="3" number_of_wfc="0" number_of_proj="0" />
+  <PP_MESH mesh="3">
+    <PP_R type="real" size="3">0.0 0.1 0.2</PP_R>
+    <PP_RAB type="real" size="3">0.1 0.1 0.1</PP_RAB>
   </PP_MESH>
-  <PP_LOCAL>1.0 2.0 3.0</PP_LOCAL>
+  <PP_LOCAL type="real" size="3">1.0 2.0 3.0</PP_LOCAL>
   <PP_NONLOCAL />
-  <PP_RHOATOM>0.2 0.3 0.4</PP_RHOATOM>
+  <PP_RHOATOM type="real" size="3">0.2 0.3 0.4</PP_RHOATOM>
 </UPF>
 "#;
 
@@ -26,7 +27,67 @@ fn minimal_document_deserializes_core_sections() {
 
     assert_eq!(doc.version, "2.0.1");
     assert_eq!(doc.header.element, "He");
+    assert_eq!(doc.header.functional, "PBE");
+    assert_eq!(doc.header.pseudo_type, PseudopotentialType::NormConserving);
+    assert_eq!(doc.header.total_psenergy, None);
+    assert_eq!(doc.header.wfc_cutoff, None);
+    assert_eq!(doc.header.rho_cutoff, None);
+    assert_eq!(doc.header.l_max_rho, None);
+    assert_eq!(doc.header.l_local, None);
+    assert_eq!(
+        doc.header.relativistic,
+        AtomicRelativisticFormalism::ScalarRelativistic
+    );
     assert_eq!(doc.mesh.r.values, vec![0.0, 0.1, 0.2]);
     assert_eq!(doc.local.values, vec![1.0, 2.0, 3.0]);
     assert_eq!(doc.rhoatom.values, vec![0.2, 0.3, 0.4]);
+}
+
+#[test]
+fn coulomb_document_allows_missing_local_section() {
+    let xml = r#"
+<UPF version="2.0.1">
+  <PP_HEADER generated="unit" author="tester" date="2026-04-03" comment="coulomb"
+             element="H" pseudo_type="1/r" relativistic="scalar"
+             is_ultrasoft="F" is_paw="F" is_coulomb="T"
+             has_so="F" has_wfc="F" has_gipaw="F" core_correction="F"
+             functional="PBE" z_valence="1.0"
+             l_max="0" mesh_size="3" number_of_wfc="0" number_of_proj="0" />
+  <PP_MESH mesh="3">
+    <PP_R type="real" size="3">0.0 0.1 0.2</PP_R>
+    <PP_RAB type="real" size="3">0.1 0.1 0.1</PP_RAB>
+  </PP_MESH>
+  <PP_RHOATOM type="real" size="3">0.2 0.3 0.4</PP_RHOATOM>
+</UPF>
+"#;
+
+    let doc = from_str(xml).unwrap();
+
+    assert_eq!(doc.header.pseudo_type, PseudopotentialType::Coulomb);
+    assert!(doc.header.is_coulomb);
+    assert!(doc.local.is_empty());
+}
+
+#[test]
+fn mesh_sized_core_sections_reject_length_mismatch() {
+    let xml = r#"
+<UPF version="2.0.1">
+  <PP_HEADER generated="unit" author="tester" date="2026-04-03" comment="mesh-mismatch"
+             element="He" pseudo_type="NC" relativistic="scalar"
+             is_ultrasoft="F" is_paw="F" is_coulomb="F"
+             has_so="F" has_wfc="F" has_gipaw="F" core_correction="F"
+             functional="PBE" z_valence="2.0"
+             l_max="0" mesh_size="3" number_of_wfc="0" number_of_proj="0" />
+  <PP_MESH mesh="3">
+    <PP_R type="real" size="2">0.0 0.1</PP_R>
+    <PP_RAB type="real" size="3">0.1 0.1 0.1</PP_RAB>
+  </PP_MESH>
+  <PP_LOCAL type="real" size="3">1.0 2.0 3.0</PP_LOCAL>
+  <PP_RHOATOM type="real" size="3">0.2 0.3 0.4</PP_RHOATOM>
+</UPF>
+"#;
+
+    let err = from_str(xml).unwrap_err();
+    assert!(err.to_string().contains("PP_R"));
+    assert!(err.to_string().contains("mesh_size"));
 }
