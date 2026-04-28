@@ -1,11 +1,23 @@
+.DS_Store
+
 /target
+/debug
+/release
 
-.worktree
+# Git
+.worktree/
 
+# AI
 docs/superpowers/
+/.agents
+/.specify
+/specs
 
-# Added by cargo
-#
-# already existing elements were commented out
 
-#/target
+/package-lock.json
+/package.json
+/node_modules
+*.log
+.env*
+.idea/
+.vscode/
