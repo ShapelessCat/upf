@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qe_pp:pseudo
+  xmlns:qe_pp="http://www.quantum-espresso.org/ns/qes/qe_pp-1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.quantum-espresso.org/ns/qes/qe_pp-1.0 ../../../docs/reference/UPF%20future%20(after%20v2.0.1)/upf-schema-future-reverse_engineering_qe.xsd">
+  <xsd_version>1.0</xsd_version>
+  <pp_info>
+    <generated>upf crate future-form sample</generated>
+    <creator>upf documentation fixture</creator>
+    <created>2026-04-24</created>
+    <type>PAW</type>
+    <relativistic_effects>nonrelativistic</relativistic_effects>
+    <element>Si</element>
+    <functional>PBE</functional>
+    <suggested_basis>
+      <ecutwfc>36.0</ecutwfc>
+      <ecutrho>144.0</ecutrho>
+    </suggested_basis>
+    <valence_orbital label="3S" n="3" l="0" occupation="2.0"/>
+    <valence_orbital label="3P" n="3" l="1" occupation="2.0"/>
+  </pp_info>
+  <pp_header>
+    <element>Si</element>
+    <z_valence>4.0</z_valence>
+    <type>PAW</type>
+    <functional>PBE</functional>
+    <relativistic>nonrelativistic</relativistic>
+    <is_ultrasoft>true</is_ultrasoft>
+    <is_paw>true</is_paw>
+    <is_coulomb>false</is_coulomb>
+    <has_so>false</has_so>
+    <has_wfc>false</has_wfc>
+    <has_gipaw>false</has_gipaw>
+    <paw_as_gipaw>false</paw_as_gipaw>
+    <core_correction>true</core_correction>
+    <with_metagga_info>false</with_metagga_info>
+    <total_psenergy>-7.1800000000</total_psenergy>
+    <wfc_cutoff>36.0</wfc_cutoff>
+    <rho_cutoff>144.0</rho_cutoff>
+    <l_max>2</l_max>
+    <l_max_rho>3</l_max_rho>
+    <l_local>-1</l_local>
+    <mesh_size>4</mesh_size>
+    <number_of_wfc>2</number_of_wfc>
+    <number_of_proj>2</number_of_proj>
+  </pp_header>
+  <pp_mesh mesh="4" dx="0.1000000000" xmin="-6.0000000000" rmax="2.0000000000" zmesh="14.0">
+    <pp_r type="real" size="4" columns="4">0.1000000000 0.2500000000 0.6000000000 1.2000000000</pp_r>
+    <pp_rab type="real" size="4" columns="4">0.0100000000 0.0250000000 0.0600000000 0.1200000000</pp_rab>
+  </pp_mesh>
+  <pp_nlcc type="real" size="4" columns="4">0.8000000000 0.4200000000 0.0800000000 0.0050000000</pp_nlcc>
+  <pp_local type="real" size="4" columns="4">-4.0000000000 -2.5000000000 -1.0000000000 -0.2500000000</pp_local>
+  <pp_nonlocal>
+    <pp_beta
+      type="real"
+      size="4"
+      columns="4"
+      index="1"
+      label="Si-3S"
+      angular_momentum="0"
+      cutoff_radius_index="4"
+      cutoff_radius="1.2000000000"
+      ultrasoft_cutoff_radius="1.3500000000">0.1200000000 0.2500000000 0.1800000000 0.0400000000</pp_beta>
+    <pp_beta
+      type="real"
+      size="4"
+      columns="4"
+      index="2"
+      label="Si-3P"
+      angular_momentum="1"
+      cutoff_radius_index="4"
+      cutoff_radius="1.1500000000"
+      ultrasoft_cutoff_radius="1.3500000000">0.0000000000 0.1800000000 0.2200000000 0.0600000000</pp_beta>
+    <pp_dij type="real" rows="2" columns="2" size="4">-0.5000000000 0.0400000000 0.0400000000 -0.3200000000</pp_dij>
+    <pp_augmentation>
+      <q_with_l>true</q_with_l>
+      <nqf>0</nqf>
+      <nqlc>3</nqlc>
+      <shape>PSQ</shape>
+      <cutoff_r>1.3500000000</cutoff_r>
+      <cutoff_r_index>4</cutoff_r_index>
+      <augmentation_epsilon>0.0000000000010000</augmentation_epsilon>
+      <l_max_aug>2</l_max_aug>
+      <pp_q type="real" rows="2" columns="2" size="4">1.0500000000 0.0800000000 0.0800000000 0.9200000000</pp_q>
+      <pp_multipoles type="real" size="3" columns="3">0.2100000000 0.0350000000 0.1400000000</pp_multipoles>
+      <pp_qijl
+        type="real"
+        size="4"
+        columns="4"
+        first_index="1"
+        second_index="1"
+        composite_index="1"
+        angular_momentum="0">0.0800000000 0.1200000000 0.0900000000 0.0100000000</pp_qijl>
+      <pp_qijl
+        type="real"
+        size="4"
+        columns="4"
+        first_index="1"
+        second_index="2"
+        composite_index="2"
+        angular_momentum="1">0.0000000000 0.0400000000 0.0700000000 0.0100000000</pp_qijl>
+      <pp_qijl
+        type="real"
+        size="4"
+        columns="4"
+        first_index="2"
+        second_index="2"
+        composite_index="3"
+        angular_momentum="0">0.0500000000 0.1100000000 0.0800000000 0.0200000000</pp_qijl>
+    </pp_augmentation>
+  </pp_nonlocal>
+  <pp_pswfc>
+    <pp_chi
+      type="real"
+      size="4"
+      columns="4"
+      index="1"
+      label="Si-3S"
+      l="0"
+      occupation="2.0"
+      n="3"
+      pseudo_energy="-0.2500000000"
+      cutoff_radius="1.2000000000"
+      ultrasoft_cutoff_radius="1.3500000000">0.0200000000 0.1100000000 0.2400000000 0.1800000000</pp_chi>
+    <pp_chi
+      type="real"
+      size="4"
+      columns="4"
+      index="2"
+      label="Si-3P"
+      l="1"
+      occupation="2.0"
+      n="3"
+      pseudo_energy="-0.1200000000"
+      cutoff_radius="1.1500000000"
+      ultrasoft_cutoff_radius="1.3500000000">0.0000000000 0.0700000000 0.2100000000 0.1700000000</pp_chi>
+  </pp_pswfc>
+  <pp_rhoatom type="real" size="4" columns="4">0.0001000000 0.0010000000 0.0050000000 0.0020000000</pp_rhoatom>
+  <pp_paw paw_data_format="2" core_energy="-12.5000000000">
+    <pp_occupations type="real" size="2" columns="2">2.0000000000 2.0000000000</pp_occupations>
+    <pp_ae_nlcc type="real" size="4" columns="4">1.1000000000 0.5000000000 0.0900000000 0.0040000000</pp_ae_nlcc>
+    <pp_ae_vloc type="real" size="4" columns="4">-8.5000000000 -5.0000000000 -1.5000000000 -0.3000000000</pp_ae_vloc>
+  </pp_paw>
+</qe_pp:pseudo>
