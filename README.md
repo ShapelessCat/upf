@@ -14,6 +14,10 @@ Format (UPF) text files into typed Rust structs and writes validated
 `UpfData` values back to UPF text, enabling semantic round-trips between file
 content and Rust data.
 
+Current UPF `2.0.1` coverage includes core sections plus conditional metagga,
+spin-orbit, PAW, and GIPAW subtrees, with validation for the corresponding
+header-gated relationships.
+
 Project documentation:
 
 - [Project guide](docs/PROJECT.md)
