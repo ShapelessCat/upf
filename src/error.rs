@@ -24,6 +24,36 @@ pub enum UpfError {
     InvalidBoolFlag { value: String },
 
     /// The document was syntactically readable but violates crate invariants.
-    #[error("{0}")]
-    Validation(String),
+    #[error("{}", format_validation_errors(.0))]
+    Validation(Vec<String>),
+}
+
+fn format_validation_errors(messages: &[String]) -> String {
+    let label = if messages.len() == 1 {
+        "validation error"
+    } else {
+        "validation errors"
+    };
+    let mut rendered = format!("{} {label}:", messages.len());
+    for message in messages {
+        rendered.push('\n');
+        rendered.push_str("- ");
+        rendered.push_str(message);
+    }
+    rendered
+}
+
+#[cfg(test)]
+mod tests {
+    use super::UpfError;
+
+    #[test]
+    fn validation_error_display_lists_count_and_messages() {
+        let err = UpfError::Validation(vec!["first problem".into(), "second problem".into()]);
+
+        let message = err.to_string();
+        assert!(message.contains("2 validation errors"));
+        assert!(message.contains("first problem"));
+        assert!(message.contains("second problem"));
+    }
 }
